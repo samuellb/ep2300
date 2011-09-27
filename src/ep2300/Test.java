@@ -1,9 +1,14 @@
 package ep2300;
 
+import java.util.Vector;
+
 import com.adventnet.snmp.snmp2.SnmpAPI;
+import com.adventnet.snmp.snmp2.SnmpIpAddress;
 import com.adventnet.snmp.snmp2.SnmpOID;
 import com.adventnet.snmp.snmp2.SnmpPDU;
 import com.adventnet.snmp.snmp2.SnmpSession;
+import com.adventnet.snmp.snmp2.SnmpVar;
+import com.adventnet.snmp.snmp2.SnmpVarBind;
 
 
 public class Test {
@@ -30,11 +35,24 @@ public class Test {
             System.out.println(response_pdu.getError());
         } else {
             System.out.println("got response of ipRouteNextHop!");
-            System.out.println(response_pdu.printVarBinds());
+            Vector bindings = response_pdu.getVariableBindings();
+            for (int i = 0; i < bindings.size(); ++i){
+                System.out.print(((SnmpVarBind) bindings.get(i)).getObjectID() + ":\t");
+                SnmpVar var = ((SnmpVarBind) bindings.get(i)).getVariable();
+//                System.out.println(i + ": " + ((SnmpVarBind) bindings.get(i)).getVariable().getClass());
+                if (var instanceof SnmpIpAddress) {
+                    SnmpIpAddress ip = (SnmpIpAddress) var;
+                    System.out.println(ip);
+                }
+                else {
+                    break;
+                }
+            }
+//            System.out.println(response_pdu.printVarBinds());
         }
         
         System.out.println("done (code v 4)");
-
+        UDPSnmpV3.close();
     }
     
 }
