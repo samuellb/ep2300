@@ -6,6 +6,15 @@
   <property name="src" location="src"/>
   <property name="build" location="build"/>
   <property name="dist"  location="dist"/>
+  
+  <property name="mainclass" value="ep2300.Test" />
+  
+  <!-- classpath for the SNMP library -->
+  <path id="snmp.path">
+    <pathelement location="/opt/AdventNet/SNMPAPI/jars/AdventNetSnmp.jar"/>
+    <pathelement location="/opt/AdventNet/SNMPAPI/jars/AdventNetLogging.jar"/>
+  </path>
+  
 
   <target name="init">
     <!-- Create the time stamp -->
@@ -18,9 +27,8 @@
         description="compile the source " >
     <!-- Compile the java code from ${src} into ${build} -->
     <javac srcdir="${src}" destdir="${build}">
-        <!-- classpath for the SNMP library -->
         <classpath>
-          <pathelement location="/opt/AdventNet/SNMPAPI/jars/AdventNetSnmp.jar"/>
+          <path refid="snmp.path" />
         </classpath>
     </javac>
   </target>
@@ -30,8 +38,12 @@
     <!-- Create the distribution directory -->
     <mkdir dir="${dist}/lib"/>
 
-    <!-- Put everything in ${build} into the MyProject-${DSTAMP}.jar file -->
-    <jar jarfile="${dist}/lib/EP2300.jar" basedir="${build}"/>
+    <!-- Put everything in ${build} into the EP2300.jar file -->
+    <jar jarfile="${dist}/lib/EP2300.jar" basedir="${build}">
+      <manifest>
+        <attribute name="Main-Class" value="${mainclass}"/>
+      </manifest>
+    </jar>
   </target>
 
   <target name="clean"
@@ -45,8 +57,18 @@
   <target name="scp" depends="dist">
     <exec executable="scp">
       <arg value="${dist}/lib/EP2300.jar" />
-      <arg value="brooklyn:EP2300.jar" />
+      <arg value="brooklyn:ep2300/lib/EP2300.jar" />
     </exec>
+  </target>
+  
+  <!-- Runs EP2300.jar -->
+  <target name="run">
+    <java classname="${mainclass}" fork="true">
+      <classpath>
+        <path refid="snmp.path" />
+        <pathelement location="${dist}/lib/EP2300.jar"/>
+      </classpath>
+    </java>
   </target>
 </project>
 
