@@ -31,7 +31,9 @@ import com.adventnet.snmp.snmp2.UDPProtocolOptions;
  */
 public class Topology implements SnmpClient
 {
-    private final SnmpOID discoverOID = new SnmpOID(".1.3.6.1.2.1.4.21.1.7"); // ipRouteNextHop
+    private static final SnmpOID discoverOID = new SnmpOID(".1.3.6.1.2.1.4.21.1.7"); // ipRouteNextHop
+    private static final int numPerResponse = 30;
+    
     Map<String, Set<SnmpIpAddress>> neighbors = new HashMap<String, Set<SnmpIpAddress>>();
 
     public Topology()
@@ -39,8 +41,13 @@ public class Topology implements SnmpClient
         probe("192.168.1.10");
         System.out.println("Topology constructor done");
     }
-
+    
     private void probe(String ip)
+    {
+        probe(ip, discoverOID);
+    }
+
+    private void probe(String ip, SnmpOID startingOID)
     {
         SnmpSession session = null;
         try {
@@ -57,7 +64,7 @@ public class Topology implements SnmpClient
             pdu.setClientID(id);
             
             // TODO below nescesary? should be handled by someone qualified
-            pdu.setMaxRepetitions(30);
+            pdu.setMaxRepetitions(numPerResponse);
 
             pdu.addNull(discoverOID);
             try {
@@ -86,27 +93,42 @@ public class Topology implements SnmpClient
             return true; // No further processing is needed
         }
         else {
-            Vector bindings = pdu.getVariableBindings();
             UDPProtocolOptions opt = (UDPProtocolOptions) session
                     .getProtocolOptions();
             String router = opt.getRemoteAddress().getCanonicalHostName();
+            
+            // Check if this is a new router
             Set<SnmpIpAddress> nextHops = neighbors.get(router);
             if (nextHops == null) {
                 System.out.println("New router discovered: \t" + router);
                 nextHops = new HashSet<SnmpIpAddress>();
                 neighbors.put(router, nextHops);
             }
-            for (int i = 0; i < bindings.size(); ++i) {
-                SnmpVar var = ((SnmpVarBind) bindings.get(i)).getVariable();
-                if (var instanceof SnmpIpAddress) {
-                    SnmpIpAddress ip = (SnmpIpAddress) var;
-                    nextHops.add(ip);
-                    if (neighbors.get(ip.toString()) == null) {
+            
+            // Go through the lists of next hops (=neighbors)
+            try {
+                ArrayResponse<SnmpIpAddress> respArray =
+                    new ArrayResponse<SnmpIpAddress>(pdu, discoverOID, numPerResponse);
+                
+                for (SnmpIpAddress addr : respArray.getElements()) {
+                    
+                    nextHops.add(addr);
+                    
+                    if (neighbors.get(addr.toString()) == null) {
                         // Not yet probed
-                        probe(ip.toString());
+                        probe(addr.toString());
                     }
                 }
+                
+                if (!respArray.reachedEnd()) {
+                    // The list is not complete, request more elements
+                    probe(router, respArray.getNextStartOID());
+                }
+            } catch (SnmpException e) {
+                //throw new RuntimeException(e);
+                e.printStackTrace();
             }
+            
             return true; // done processing PDU
         }
     }
