@@ -16,6 +16,7 @@ public class Test {
         SnmpPDU pdu = new SnmpPDU();
         pdu.setCommand(SnmpAPI.GET_REQ_MSG);
         pdu.addNull(new SnmpOID(".1.3.6.1.2.1.1.1.0"));
+        pdu.setUserName("2G1332_student".getBytes());
         SnmpPDU response_pdu = session.syncSend(pdu);
         if(response_pdu == null) {
              System.out.println("The Request has timed out.");
