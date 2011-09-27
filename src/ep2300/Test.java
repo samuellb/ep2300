@@ -13,6 +13,9 @@ import com.adventnet.snmp.snmp2.SnmpVarBind;
 
 public class Test {
     
+    private static SnmpOID ipRouteNextHop = new SnmpOID(".1.3.6.1.2.1.4.21.1.7");
+    private static int numPerResponse = 30;
+    
     public static void main(String[] args) throws Exception {
         
         SnmpSession session = UDPSnmpV3.createSession("192.168.1.10",
@@ -22,10 +25,10 @@ public class Test {
         // .1.3.6.1.2.1.4.21.1.7 = ipRouteNextHop
         SnmpPDU pdu = new SnmpPDU();
         pdu.setCommand(SnmpAPI.GETBULK_REQ_MSG);
-        pdu.setMaxRepetitions(30);
+        pdu.setMaxRepetitions(numPerResponse);
         pdu.setNonRepeaters(0);
         
-        pdu.addNull(new SnmpOID(".1.3.6.1.2.1.4.21.1.7"));
+        pdu.addNull(ipRouteNextHop);
         
         SnmpPDU response_pdu = session.syncSend(pdu);
         if (response_pdu == null) {
@@ -35,19 +38,15 @@ public class Test {
             System.out.println(response_pdu.getError());
         } else {
             System.out.println("got response of ipRouteNextHop!");
-            Vector bindings = response_pdu.getVariableBindings();
-            for (int i = 0; i < bindings.size(); ++i){
-                System.out.print(((SnmpVarBind) bindings.get(i)).getObjectID() + ":\t");
-                SnmpVar var = ((SnmpVarBind) bindings.get(i)).getVariable();
-//                System.out.println(i + ": " + ((SnmpVarBind) bindings.get(i)).getVariable().getClass());
-                if (var instanceof SnmpIpAddress) {
-                    SnmpIpAddress ip = (SnmpIpAddress) var;
-                    System.out.println(ip);
-                }
-                else {
-                    break;
-                }
+            
+            ArrayResponse<SnmpIpAddress> nextHops =
+                new ArrayResponse<SnmpIpAddress>(response_pdu, ipRouteNextHop, numPerResponse);
+            
+            for (SnmpIpAddress addr : nextHops.getElements()) {
+                System.out.println(addr);
             }
+            System.out.println("reached end? "+nextHops.reachedEnd()+
+                "   next oid="+nextHops.getNextStartOID());
 //            System.out.println(response_pdu.printVarBinds());
         }
         
