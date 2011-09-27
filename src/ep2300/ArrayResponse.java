@@ -1,6 +1,7 @@
 package ep2300;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 import com.adventnet.snmp.snmp2.SnmpException;
@@ -9,7 +10,7 @@ import com.adventnet.snmp.snmp2.SnmpPDU;
 import com.adventnet.snmp.snmp2.SnmpVar;
 import com.adventnet.snmp.snmp2.SnmpVarBind;
 
-public final class ArrayResponse<T extends SnmpVar>
+public final class ArrayResponse<T extends SnmpVar> implements Iterable<T>
 {
     
     private final List<T> elements;
@@ -103,6 +104,12 @@ public final class ArrayResponse<T extends SnmpVar>
     public List<T> getElements()
     {
         return elements;
+    }
+
+    @Override
+    public Iterator<T> iterator()
+    {
+        return elements.iterator();
     }
 }
 
