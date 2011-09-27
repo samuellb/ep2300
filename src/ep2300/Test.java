@@ -16,7 +16,6 @@ public class Test {
         // .1.3.6.1.2. <-- this is implicit if the OID doesn't start with a .
         // .1.3.6.1.2.1.4.21.1.7 = ipRouteNextHop
         SnmpPDU pdu = new SnmpPDU();
-        pdu.setUserName("2G1332_student".getBytes());
         pdu.setCommand(SnmpAPI.GETBULK_REQ_MSG);
         pdu.setMaxRepetitions(30);
         pdu.setNonRepeaters(0);
@@ -34,7 +33,7 @@ public class Test {
             System.out.println(response_pdu.printVarBinds());
         }
         
-        System.out.println("done (code v 3)");
+        System.out.println("done (code v 4)");
 
     }
     

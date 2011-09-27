@@ -26,6 +26,7 @@ public class UDPSnmpV3 {
         SnmpSession session = new SnmpSession(api);
         session.setVersion(SnmpAPI.SNMP_VERSION_3);
         session.setProtocolOptions(protocolOptions);
+        session.setUserName(username.getBytes());
         session.open();
         
         USMUtils.init_v3_parameters(username, null, USMUserEntry.MD5_AUTH,
