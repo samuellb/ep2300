@@ -110,7 +110,7 @@ public class Topology implements SnmpClient
                 ArrayResponse<SnmpIpAddress> respArray =
                     new ArrayResponse<SnmpIpAddress>(pdu, discoverOID, numPerResponse);
                 
-                for (SnmpIpAddress addr : respArray.getElements()) {
+                for (SnmpIpAddress addr : respArray) {
                     
                     nextHops.add(addr);
                     
