@@ -7,9 +7,9 @@ import com.adventnet.snmp.snmp2.SnmpSession;
 import com.adventnet.snmp.snmp2.UDPProtocolOptions;
 
 
-class Test {
+public class Test {
     
-    static void main(String[] args) throws Exception {
+    public static void main(String[] args) throws Exception {
         SnmpAPI api = new SnmpAPI();
         SnmpSession session = new SnmpSession(api);
         session.open();
