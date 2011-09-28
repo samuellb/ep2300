@@ -53,7 +53,10 @@ public class UDPSnmpV3 {
                 
             } catch (SnmpException e) {
                 // Error. Abort if the retry limit is reached
-                if (attempt++ > numRetries) throw e;
+                if (attempt++ > numRetries) {
+                    System.out.println("gave up with: "+address);
+                    throw e;
+                }
             }
         }
     }
@@ -70,6 +73,7 @@ public class UDPSnmpV3 {
         session.setVersion(SnmpAPI.SNMP_VERSION_3);
         session.setProtocolOptions(protocolOptions);
         session.setUserName(username.getBytes());
+        session.setTimeout(750);
         session.open();
         
         boolean success = false;
