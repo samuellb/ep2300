@@ -150,6 +150,8 @@ public class Topology implements SnmpClient
 
                     for (SnmpIpAddress addr : respArray) {
                         String addrStr = addr.toString();
+                        if (addrStr.equals(router)) continue;
+                        
                         nextHops.add(addrStr);
 
                         if (probed.add(addrStr)) {
