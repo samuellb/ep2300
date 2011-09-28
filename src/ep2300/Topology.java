@@ -5,6 +5,7 @@ import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.HashSet;
 import java.util.TreeSet;
 
 import com.adventnet.snmp.snmp2.SnmpAPI;
@@ -33,15 +34,18 @@ public class Topology implements SnmpClient
     private static final SnmpOID discoverOID = new SnmpOID(
             ".1.3.6.1.2.1.4.21.1.7"); // ipRouteNextHop
     private static final int numPerResponse = 30;
+    private static final String firstRouter = "192.168.1.10";
 
     Map<String, Set<String>> neighbors = new HashMap<String, Set<String>>();
+    Set<String> probed = new HashSet<String>();
 
     /**
      * Start the probing
      */
     public Topology()
     {
-        probe("192.168.1.10");
+        probed.add(firstRouter);
+        probe(firstRouter);
     }
 
     /**
@@ -133,11 +137,12 @@ public class Topology implements SnmpClient
                         pdu, discoverOID, numPerResponse);
 
                 for (SnmpIpAddress addr : respArray) {
-                    nextHops.add(addr.toString());
+                    String addrStr = addr.toString();
+                    nextHops.add(addrStr);
 
-                    if (neighbors.get(addr.toString()) == null) {
+                    if (probed.add(addrStr)) {
                         // Not yet probed
-                        probe(addr.toString());
+                        probe(addrStr);
                     }
                 }
 
