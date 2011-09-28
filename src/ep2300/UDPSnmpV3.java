@@ -22,6 +22,9 @@ public class UDPSnmpV3 {
     private static final String username = "2G1332_student";
     private static final String password = "netmanagement";
     
+    // How many times we should try to connect again
+    private static final int numRetries = 2;
+    
     public static SnmpSession createSession(String address) throws SnmpException {
         return createSession(address, username, password);
     }
@@ -33,6 +36,22 @@ public class UDPSnmpV3 {
     public static SnmpSession createSession(String address, String username,
             String password) throws SnmpException {
         
+        int attempt = 0;
+        while (true) {
+            try {
+                return tryCreateSession(address, username, password);
+            } catch (SnmpException e) {
+                if (attempt++ > numRetries) throw e;
+            }
+        }
+    }
+    
+    /**
+     * Tries once to create an SNMPv3 session.
+     */
+    private static SnmpSession tryCreateSession(String address, String username,
+            String password) throws SnmpException {
+        
         ProtocolOptions protocolOptions = new UDPProtocolOptions(address);
         
         SnmpSession session = new SnmpSession(api);
@@ -41,10 +60,17 @@ public class UDPSnmpV3 {
         session.setUserName(username.getBytes());
         session.open();
         
-        USMUtils.init_v3_parameters(username, null, USMUserEntry.MD5_AUTH,
-            password, null, protocolOptions, session, true);
-        
-        sessions.add(session);
+        boolean success = false;
+        try {
+            USMUtils.init_v3_parameters(username, null, USMUserEntry.MD5_AUTH,
+                password, null, protocolOptions, session, true);
+            
+            sessions.add(session);
+            
+            success = true;
+        } finally {
+            if (!success) session.close();
+        }
         
         return session;
     }
