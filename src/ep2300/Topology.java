@@ -117,6 +117,8 @@ public class Topology implements SnmpClient
         else {
             if (!ArrayResponse.samePrefix(pdu.getObjectID(0), discoverOID)) {
                 // The callback was not a ipRouteNextHop
+                System.out.println("Invalid response, probing again: "+pdu.getObjectID(0));
+                probe(router);
                 return false;
             }
             UDPProtocolOptions opt = (UDPProtocolOptions) session
