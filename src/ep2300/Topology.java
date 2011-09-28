@@ -51,6 +51,7 @@ public class Topology implements SnmpClient
      */
     private void probe(String ip)
     {
+        // Start from discoverOID
         probe(ip, discoverOID);
     }
 
@@ -143,6 +144,9 @@ public class Topology implements SnmpClient
                 if (!respArray.reachedEnd()) {
                     // The list is not complete, request more elements
                     probe(router, respArray.getNextStartOID());
+                } else {
+                    // We're done
+                    session.close();
                 }
             }
             catch (SnmpException e) {
