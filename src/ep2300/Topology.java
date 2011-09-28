@@ -1,9 +1,11 @@
 package ep2300;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 import com.adventnet.snmp.snmp2.SnmpAPI;
 import com.adventnet.snmp.snmp2.SnmpClient;
@@ -32,7 +34,7 @@ public class Topology implements SnmpClient
             ".1.3.6.1.2.1.4.21.1.7"); // ipRouteNextHop
     private static final int numPerResponse = 30;
 
-    Map<String, Set<SnmpIpAddress>> neighbors = new HashMap<String, Set<SnmpIpAddress>>();
+    Map<String, Set<String>> neighbors = new HashMap<String, Set<String>>();
 
     /**
      * Start the probing
@@ -65,8 +67,9 @@ public class Topology implements SnmpClient
             session = UDPSnmpV3.createSession(ip); // Begin here
         }
         catch (SnmpException e) {
-            System.err.println("Could not start session to ip " + ip);
-            e.printStackTrace();
+            System.err.println("Could not start session to ip " + ip + ": "
+                    + e.getMessage());
+            // e.printStackTrace();
         }
         if (session != null) { // Should always happen
             int id = session.addSnmpClientWithID(this);
@@ -104,7 +107,7 @@ public class Topology implements SnmpClient
             System.out.println("A request has failed:");
             System.out.println(pdu.getError());
             return true; // No further processing is needed since the request
-                         // failed
+            // failed
         }
         else {
             if (!ArrayResponse.samePrefix(pdu.getObjectID(0), discoverOID)) {
@@ -116,10 +119,10 @@ public class Topology implements SnmpClient
             String router = opt.getRemoteAddress().getCanonicalHostName();
 
             // Check if this is a new router
-            Set<SnmpIpAddress> nextHops = neighbors.get(router);
+            Set<String> nextHops = neighbors.get(router);
             if (nextHops == null) {
                 System.out.println("New router discovered: \t" + router);
-                nextHops = new HashSet<SnmpIpAddress>();
+                nextHops = new TreeSet<String>();
                 neighbors.put(router, nextHops);
             }
 
@@ -129,7 +132,7 @@ public class Topology implements SnmpClient
                         pdu, discoverOID, numPerResponse);
 
                 for (SnmpIpAddress addr : respArray) {
-                    nextHops.add(addr);
+                    nextHops.add(addr.toString());
 
                     if (neighbors.get(addr.toString()) == null) {
                         // Not yet probed
@@ -155,6 +158,22 @@ public class Topology implements SnmpClient
     public void debugPrint(String debugOutput)
     {
         System.err.println("debuging");
+    }
+
+    @Override
+    public String toString()
+    {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        PrintStream out = new PrintStream(baos);
+        for (String router : neighbors.keySet()) {
+            Set<String> nextHops = neighbors.get(router);
+            out.println(router + ":");
+            for (String nextHop : nextHops) {
+                out.println("\t" + nextHop);
+            }
+            out.println();
+        }
+        return baos.toString();
     }
 
 }
