@@ -35,7 +35,6 @@ public class Topology implements SnmpClient
     private static final SnmpOID discoverOID = new SnmpOID(
             ".1.3.6.1.2.1.4.21.1.7"); // ipRouteNextHop
     private static final int numPerResponse = 30;
-    private static final String firstRouter = "192.168.1.10";
 
     Map<String, Set<String>> neighbors = new HashMap<String, Set<String>>();
     Set<String> probed = new HashSet<String>();
@@ -45,10 +44,16 @@ public class Topology implements SnmpClient
     /**
      * Start the probing
      */
-    public Topology()
+    public Topology(String firstRouter)
     {
         probed.add(firstRouter);
         probe(firstRouter);
+    }
+    
+    @Deprecated
+    public Topology()
+    {
+        this("192.168.1.10");
     }
 
     /**
@@ -207,6 +212,26 @@ public class Topology implements SnmpClient
             out.println();
         }
         return baos.toString();
+    }
+    
+    
+    public static void main(String[] args)
+    {
+        if (args.length != 1) {
+            System.err.println("usage: java Topology <first router>");
+            System.exit(2);
+        }
+        
+        System.out.println("Discovering the topology...");
+        Topology topo = new Topology();
+        
+        topo.waitUntilFinished();
+        
+        System.out.println("----------------------------------------");
+        System.out.println("Discovered topology:\n");
+        System.out.print(topo.toString());
+        
+        UDPSnmpV3.close();
     }
 
 }

@@ -61,6 +61,17 @@
     </exec>
   </target>
   
+  <!-- Runs Topology (task 1) -->
+  <target name="run-topology" depends="compile">
+    <java classname="ep2300.Topology" fork="true">
+      <arg value="192.168.1.10" />
+      <classpath>
+        <path refid="snmp.path" />
+        <pathelement location="${build}"/>
+      </classpath>
+    </java>
+  </target>
+  
   <!-- Runs EP2300.jar -->
   <target name="run">
     <java classname="${mainclass}" fork="true">
