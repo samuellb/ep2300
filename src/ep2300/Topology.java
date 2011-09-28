@@ -115,15 +115,16 @@ public class Topology implements SnmpClient
             // failed
         }
         else {
+            UDPProtocolOptions opt = (UDPProtocolOptions) session
+                    .getProtocolOptions();
+            String router = opt.getRemoteAddress().getCanonicalHostName();
+            
             if (!ArrayResponse.samePrefix(pdu.getObjectID(0), discoverOID)) {
                 // The callback was not a ipRouteNextHop
                 System.out.println("Invalid response, probing again: "+pdu.getObjectID(0));
                 probe(router);
                 return false;
             }
-            UDPProtocolOptions opt = (UDPProtocolOptions) session
-                    .getProtocolOptions();
-            String router = opt.getRemoteAddress().getCanonicalHostName();
 
             // Check if this is a new router
             Set<String> nextHops = neighbors.get(router);
