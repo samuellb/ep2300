@@ -2,6 +2,7 @@ package ep2300;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -38,6 +39,8 @@ public class Topology implements SnmpClient
 
     Map<String, Set<String>> neighbors = new HashMap<String, Set<String>>();
     Set<String> probed = new HashSet<String>();
+    
+    private AtomicInteger outstandingRequests = new AtomicInteger(0);
 
     /**
      * Start the probing
@@ -86,6 +89,7 @@ public class Topology implements SnmpClient
 
             pdu.addNull(discoverOID);
             try {
+                outstandingRequests.incrementAndGet();
                 session.send(pdu);
             }
             catch (SnmpException e) {
@@ -107,62 +111,79 @@ public class Topology implements SnmpClient
     @Override
     public boolean callback(SnmpSession session, SnmpPDU pdu, int requestID)
     {
-
-        if (pdu.getErrstat() != 0) { // FIXME is this state reachable?
-            System.out.println("A request has failed:");
-            System.out.println(pdu.getError());
-            return true; // No further processing is needed since the request
-            // failed
-        }
-        else {
-            UDPProtocolOptions opt = (UDPProtocolOptions) session
-                    .getProtocolOptions();
-            String router = opt.getRemoteAddress().getCanonicalHostName();
-            
-            if (!ArrayResponse.samePrefix(pdu.getObjectID(0), discoverOID)) {
-                // The callback was not a ipRouteNextHop
-                System.out.println("Invalid response, probing again: "+pdu.getObjectID(0));
-                probe(router);
-                return false;
+        try {
+            if (pdu.getErrstat() != 0) { // FIXME is this state reachable?
+                System.out.println("A request has failed:");
+                System.out.println(pdu.getError());
+                return true; // No further processing is needed since the request
+                // failed
             }
+            else {
+                UDPProtocolOptions opt = (UDPProtocolOptions) session
+                        .getProtocolOptions();
+                String router = opt.getRemoteAddress().getCanonicalHostName();
+                
+                if (!ArrayResponse.samePrefix(pdu.getObjectID(0), discoverOID)) {
+                    // The callback was not a ipRouteNextHop
+                    System.out.println("Invalid response, probing again: "+pdu.getObjectID(0));
+                    probe(router);
+                    return false;
+                }
 
-            // Check if this is a new router
-            Set<String> nextHops = neighbors.get(router);
-            if (nextHops == null) {
-                System.out.println("New router discovered: \t" + router);
-                nextHops = new TreeSet<String>();
-                neighbors.put(router, nextHops);
-            }
+                // Check if this is a new router
+                Set<String> nextHops = neighbors.get(router);
+                if (nextHops == null) {
+                    System.out.println("New router discovered: \t" + router);
+                    nextHops = new TreeSet<String>();
+                    neighbors.put(router, nextHops);
+                }
 
-            // Go through the lists of next hops (=neighbors)
-            try {
-                ArrayResponse<SnmpIpAddress> respArray = new ArrayResponse<SnmpIpAddress>(
-                        pdu, discoverOID, numPerResponse);
+                // Go through the lists of next hops (=neighbors)
+                try {
+                    ArrayResponse<SnmpIpAddress> respArray = new ArrayResponse<SnmpIpAddress>(
+                            pdu, discoverOID, numPerResponse);
 
-                for (SnmpIpAddress addr : respArray) {
-                    String addrStr = addr.toString();
-                    nextHops.add(addrStr);
+                    for (SnmpIpAddress addr : respArray) {
+                        String addrStr = addr.toString();
+                        nextHops.add(addrStr);
 
-                    if (probed.add(addrStr)) {
-                        // Not yet probed
-                        probe(addrStr);
+                        if (probed.add(addrStr)) {
+                            // Not yet probed
+                            probe(addrStr);
+                        }
+                    }
+
+                    if (!respArray.reachedEnd()) {
+                        // The list is not complete, request more elements
+                        probe(router, respArray.getNextStartOID());
+                    } else {
+                        // We're done
+                        session.close();
                     }
                 }
-
-                if (!respArray.reachedEnd()) {
-                    // The list is not complete, request more elements
-                    probe(router, respArray.getNextStartOID());
-                } else {
-                    // We're done
-                    session.close();
+                catch (SnmpException e) {
+                    // throw new RuntimeException(e);
+                    e.printStackTrace();
                 }
-            }
-            catch (SnmpException e) {
-                // throw new RuntimeException(e);
-                e.printStackTrace();
-            }
 
-            return true; // done processing PDU
+                return true; // done processing PDU
+            }
+        }
+        finally {
+            if (outstandingRequests.decrementAndGet() <= 0) {
+                System.out.println("Discovery finished.\n\n");
+                synchronized(this) { notifyAll(); }
+            }
+        }
+    }
+    
+    public synchronized void waitUntilFinished()
+    {
+        while (outstandingRequests.get() > 0) {
+            try {
+                wait();
+            }
+            catch (InterruptedException e) { }
         }
     }
 
