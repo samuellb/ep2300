@@ -1,6 +1,7 @@
 package ep2300;
 
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import com.adventnet.snmp.snmp2.ProtocolOptions;
 import com.adventnet.snmp.snmp2.SnmpAPI;
@@ -25,6 +26,10 @@ public class UDPSnmpV3 {
     // How many times we should try to connect again
     private static final int numRetries = 2;
     
+    // Statistics
+    private static AtomicInteger successfulConnections = new AtomicInteger();
+    private static AtomicInteger attemptedConnections = new AtomicInteger();
+    
     public static SnmpSession createSession(String address) throws SnmpException {
         return createSession(address, username, password);
     }
@@ -39,8 +44,15 @@ public class UDPSnmpV3 {
         int attempt = 0;
         while (true) {
             try {
-                return tryCreateSession(address, username, password);
+                attemptedConnections.incrementAndGet();
+                SnmpSession session = tryCreateSession(address, username, password);
+                
+                // Success
+                successfulConnections.incrementAndGet();
+                return session;
+                
             } catch (SnmpException e) {
+                // Error. Abort if the retry limit is reached
                 if (attempt++ > numRetries) throw e;
             }
         }
@@ -78,6 +90,14 @@ public class UDPSnmpV3 {
     public static void close() {
         // TODO Go through the sessions and close them (perhaps unnescesary?)
         api.close();
+    }
+    
+    public static int getAttemptedConnections() {
+        return attemptedConnections.get();
+    }
+    
+    public static int getSuccessfulConnections() {
+        return successfulConnections.get();
     }
 }
 
