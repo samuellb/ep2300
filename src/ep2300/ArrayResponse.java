@@ -76,8 +76,10 @@ public final class ArrayResponse<T extends SnmpVar> implements Iterable<T>
      *   samePrefix("1.2.1", "1.2") == true
      *   samePrefix("1.3",   "1.2") == false
      *   samePrefix("1.2",   "1.2") == true
+     *   
+     *   TODO Should this be moved somewhere else? its used in Topology.
      */
-    private static boolean samePrefix(SnmpOID oid, SnmpOID prefix)
+    static boolean samePrefix(SnmpOID oid, SnmpOID prefix)
     {
         String os = oid.toString()+".";
         String ps = prefix.toString()+".";

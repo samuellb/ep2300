@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.Vector;
 
 import com.adventnet.snmp.snmp2.SnmpAPI;
 import com.adventnet.snmp.snmp2.SnmpClient;
@@ -13,8 +12,6 @@ import com.adventnet.snmp.snmp2.SnmpIpAddress;
 import com.adventnet.snmp.snmp2.SnmpOID;
 import com.adventnet.snmp.snmp2.SnmpPDU;
 import com.adventnet.snmp.snmp2.SnmpSession;
-import com.adventnet.snmp.snmp2.SnmpVar;
-import com.adventnet.snmp.snmp2.SnmpVarBind;
 import com.adventnet.snmp.snmp2.UDPProtocolOptions;
 
 /*
@@ -31,22 +28,36 @@ import com.adventnet.snmp.snmp2.UDPProtocolOptions;
  */
 public class Topology implements SnmpClient
 {
-    private static final SnmpOID discoverOID = new SnmpOID(".1.3.6.1.2.1.4.21.1.7"); // ipRouteNextHop
+    private static final SnmpOID discoverOID = new SnmpOID(
+            ".1.3.6.1.2.1.4.21.1.7"); // ipRouteNextHop
     private static final int numPerResponse = 30;
-    
+
     Map<String, Set<SnmpIpAddress>> neighbors = new HashMap<String, Set<SnmpIpAddress>>();
 
+    /**
+     * Start the probing
+     */
     public Topology()
     {
         probe("192.168.1.10");
-        System.out.println("Topology constructor done");
     }
-    
+
+    /**
+     * Probe an IP for routes.
+     * 
+     * @param ip The IP to probe
+     */
     private void probe(String ip)
     {
         probe(ip, discoverOID);
     }
 
+    /**
+     * Probe an IP for routes starting at startingOID
+     * 
+     * @param ip The IP to probe
+     * @param startingOID The OID to start at
+     */
     private void probe(String ip, SnmpOID startingOID)
     {
         SnmpSession session = null;
@@ -62,8 +73,7 @@ public class Topology implements SnmpClient
             SnmpPDU pdu = new SnmpPDU();
             pdu.setCommand(SnmpAPI.GETBULK_REQ_MSG);
             pdu.setClientID(id);
-            
-            // TODO below nescesary? should be handled by someone qualified
+
             pdu.setMaxRepetitions(numPerResponse);
 
             pdu.addNull(discoverOID);
@@ -83,6 +93,9 @@ public class Topology implements SnmpClient
         return true; // Because we already are authenticated
     }
 
+    /**
+     * Add all nexthops and the router in the response to the list of routes.
+     */
     @Override
     public boolean callback(SnmpSession session, SnmpPDU pdu, int requestID)
     {
@@ -90,13 +103,18 @@ public class Topology implements SnmpClient
         if (pdu.getErrstat() != 0) { // FIXME is this state reachable?
             System.out.println("A request has failed:");
             System.out.println(pdu.getError());
-            return true; // No further processing is needed
+            return true; // No further processing is needed since the request
+                         // failed
         }
         else {
+            if (!ArrayResponse.samePrefix(pdu.getObjectID(0), discoverOID)) {
+                // The callback was not a ipRouteNextHop
+                return false;
+            }
             UDPProtocolOptions opt = (UDPProtocolOptions) session
                     .getProtocolOptions();
             String router = opt.getRemoteAddress().getCanonicalHostName();
-            
+
             // Check if this is a new router
             Set<SnmpIpAddress> nextHops = neighbors.get(router);
             if (nextHops == null) {
@@ -104,31 +122,31 @@ public class Topology implements SnmpClient
                 nextHops = new HashSet<SnmpIpAddress>();
                 neighbors.put(router, nextHops);
             }
-            
+
             // Go through the lists of next hops (=neighbors)
             try {
-                ArrayResponse<SnmpIpAddress> respArray =
-                    new ArrayResponse<SnmpIpAddress>(pdu, discoverOID, numPerResponse);
-                
+                ArrayResponse<SnmpIpAddress> respArray = new ArrayResponse<SnmpIpAddress>(
+                        pdu, discoverOID, numPerResponse);
+
                 for (SnmpIpAddress addr : respArray) {
-                    
                     nextHops.add(addr);
-                    
+
                     if (neighbors.get(addr.toString()) == null) {
                         // Not yet probed
                         probe(addr.toString());
                     }
                 }
-                
+
                 if (!respArray.reachedEnd()) {
                     // The list is not complete, request more elements
                     probe(router, respArray.getNextStartOID());
                 }
-            } catch (SnmpException e) {
-                //throw new RuntimeException(e);
+            }
+            catch (SnmpException e) {
+                // throw new RuntimeException(e);
                 e.printStackTrace();
             }
-            
+
             return true; // done processing PDU
         }
     }
