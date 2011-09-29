@@ -48,6 +48,11 @@ public final class ArrayResponse<T extends SnmpVar> implements Iterable<T>
             SnmpVarBind vb = (SnmpVarBind)bindings.get(i);
             SnmpOID oid = vb.getObjectID();
             
+            if (SnmpOID.getLexicographicallyFirstOID(oid, arrayPrefix) == oid) {
+                // This OID comes before the array, so skip it!
+                continue;
+            }
+            
             if (!samePrefix(oid, arrayPrefix)) {
                 // Reached something that's not in the array.
                 // This also means that we reached the end.
