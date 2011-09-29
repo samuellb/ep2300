@@ -229,20 +229,17 @@ public final class LinkStatistics implements SnmpClient
         Topology topo = new Topology(firstRouter);
         topo.waitUntilFinished();
         
-        System.out.println("Monitoring...");
+        System.out.println("Monitoring...\n");
         LinkStatistics stats = new LinkStatistics(topo);
         
-        stats.update();
-        stats.waitUntilFinished();
-        System.out.println("Done, exiting!");
-        
-        // sleep forever...
-        /*while (true) {
-            try { Thread.sleep(0); }
+        while (true) {
+            System.out.println("Updating...");
+            stats.update();
+            stats.waitUntilFinished();
+            
+            try { Thread.sleep(1000); }
             catch (InterruptedException e) { }
-        }*/
-        
-        UDPSnmpV3.close();
+        }
     }
 
 }
