@@ -23,9 +23,10 @@ import com.adventnet.snmp.snmp2.UDPProtocolOptions;
  */
 public final class LinkStatistics implements SnmpClient
 {
-    // TODO
-    private static final SnmpOID outOctetsOID = new SnmpOID("xxxxx");
-    private static final SnmpOID outPacketsOID = new SnmpOID("xxxxx");
+    private static final SnmpOID outOctetsOID =
+        new SnmpOID("1.3.6.1.2.1.2.2.1.16");
+    private static final SnmpOID outPacketsOID =
+        new SnmpOID("1.3.6.1.2.1.2.2.1.17");
     private static final int numPerResponse = 30;
     
     public static final class Link
