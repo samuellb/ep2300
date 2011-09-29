@@ -165,7 +165,7 @@ public class Topology implements SnmpClient
                         probe(router, respArray.getNextStartOID());
                     } else {
                         // We're done
-                        session.close();
+                        session.removeSnmpClient(this);
                     }
                 }
                 catch (SnmpException e) {

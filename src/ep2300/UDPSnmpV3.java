@@ -1,6 +1,8 @@
 package ep2300;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.adventnet.snmp.snmp2.ProtocolOptions;
@@ -17,7 +19,7 @@ public class UDPSnmpV3 {
     
     private static SnmpAPI api = new SnmpAPI();
     
-    private static ArrayList<SnmpSession> sessions = new ArrayList<SnmpSession>();
+    private static Map<String, SnmpSession> sessions = new HashMap<String, SnmpSession>();
     
     // Perhaps not the best place for them
     private static final String username = "2G1332_student";
@@ -41,6 +43,25 @@ public class UDPSnmpV3 {
     public static SnmpSession createSession(String address, String username,
             String password) throws SnmpException {
         
+        // Check if a session exists to this address
+        synchronized (sessions) {
+            if (sessions.containsKey(address)) {
+                // Wait for it to be established
+                while (true) {
+                    SnmpSession existing = sessions.get(address);
+                    if (existing != null) return existing;
+                    
+                    try { sessions.wait(); }
+                    catch (InterruptedException e) { }
+                }
+                // not reached
+            }
+            else {
+                // Otherwise, continue and mark this address as "in progress"
+                sessions.put(address, null);
+            }
+        }
+        
         int attempt = 0;
         while (true) {
             try {
@@ -49,12 +70,20 @@ public class UDPSnmpV3 {
                 
                 // Success
                 successfulConnections.incrementAndGet();
+                synchronized(sessions) {
+                    sessions.put(address, session);
+                    sessions.notifyAll();
+                }
                 return session;
                 
             } catch (SnmpException e) {
                 // Error. Abort if the retry limit is reached
                 if (attempt++ > numRetries) {
                     System.out.println("gave up with: "+address);
+                    synchronized(sessions) {
+                        sessions.remove(address);
+                        sessions.notifyAll();
+                    }
                     throw e;
                 }
             }
@@ -80,8 +109,6 @@ public class UDPSnmpV3 {
         try {
             USMUtils.init_v3_parameters(username, null, USMUserEntry.MD5_AUTH,
                 password, null, protocolOptions, session, true);
-            
-            sessions.add(session);
             
             success = true;
         } finally {
