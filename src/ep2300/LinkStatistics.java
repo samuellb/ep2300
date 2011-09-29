@@ -27,7 +27,6 @@ public final class LinkStatistics implements SnmpClient
         new SnmpOID("1.3.6.1.2.1.2.2.1.16");
     private static final SnmpOID outPacketsOID =
         new SnmpOID("1.3.6.1.2.1.2.2.1.17");
-    private static final int numPerResponse = 30;
     
     public static final class Link
     {
@@ -109,12 +108,14 @@ public final class LinkStatistics implements SnmpClient
             int id = session.addSnmpClientWithID(this);
             SnmpPDU pdu = new SnmpPDU();
             pdu.setCommand(SnmpAPI.GETBULK_REQ_MSG);
+            //pdu.setCommand(SnmpAPI.GET_REQ_MSG);
             pdu.setClientID(id);
+            
+            // (nr=2, mr=0) should also work... but neither works.
+            pdu.setNonRepeaters(0);
+            pdu.setMaxRepetitions(1);
 
-            pdu.setMaxRepetitions(numPerResponse);
-
-            // XXX will this work?
-            pdu.addNull(outOctetsOID);
+            pdu.addNull(outOctetsOID); // we also need the interface number
             pdu.addNull(outPacketsOID);
             try {
                 outstandingRequests.incrementAndGet();
@@ -139,6 +140,7 @@ public final class LinkStatistics implements SnmpClient
     @Override
     public boolean callback(SnmpSession session, SnmpPDU pdu, int requestID)
     {
+        System.out.println("callback!");
         UDPProtocolOptions opt = (UDPProtocolOptions) session
                     .getProtocolOptions();
         String router = opt.getRemoteAddress().getCanonicalHostName();
@@ -149,15 +151,28 @@ public final class LinkStatistics implements SnmpClient
             return true; // No further processing is needed since the request
             // failed
         }
-        else if (!ArrayResponse.samePrefix(pdu.getObjectID(0), outOctetsOID)) {
-            // The callback was not a ipRouteNextHop
-            System.out.println("Invalid response, probing again: "+pdu.getObjectID(0));
+        else if (pdu.getObjectID(0).toString().equals(".1.3.6.1.6.3.15.1.1.2.0")) {
+            // Try again
+            System.out.println("trying again...");
             probe(router);
+            return true;
+        }
+        else if (!ArrayResponse.samePrefix(pdu.getObjectID(0), outOctetsOID)) {
+            System.out.println("Invalid response, probing again: "+pdu.getObjectID(0));
+            try {
+                for (int i = 1; ; i++) {
+                    SnmpOID oid = pdu.getObjectID(i);
+                    if (oid == null) break;
+                    System.out.println("\t"+oid);
+                }
+            } catch (Exception e) { }
+            //probe(router);
             return false;
         }
         else {
             // TODO we should update the link statistics here
             System.out.println("hello? implement me!");
+            System.out.println(pdu.printVarBinds());
             
             return true; // done processing PDU
         }
