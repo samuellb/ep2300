@@ -24,9 +24,9 @@ import com.adventnet.snmp.snmp2.UDPProtocolOptions;
 public final class LinkStatistics implements SnmpClient
 {
     private static final SnmpOID outOctetsOID =
-        new SnmpOID("1.3.6.1.2.1.2.2.1.16");
+        new SnmpOID(".1.3.6.1.2.1.2.2.1.16");
     private static final SnmpOID outPacketsOID =
-        new SnmpOID("1.3.6.1.2.1.2.2.1.17");
+        new SnmpOID(".1.3.6.1.2.1.2.2.1.17");
     
     public static final class Link
     {
@@ -113,10 +113,12 @@ public final class LinkStatistics implements SnmpClient
             
             // (nr=2, mr=0) should also work... but neither works.
             pdu.setNonRepeaters(0);
-            pdu.setMaxRepetitions(1);
+            //pdu.setMaxRepetitions(1);
+            
+            pdu.setMaxRepetitions(30); // should be a constant
 
             pdu.addNull(outOctetsOID); // we also need the interface number
-            pdu.addNull(outPacketsOID);
+//            pdu.addNull(outPacketsOID); -- comes directly after outOctetsOID
             try {
                 outstandingRequests.incrementAndGet();
                 session.send(pdu);
