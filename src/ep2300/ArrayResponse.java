@@ -7,6 +7,7 @@ import java.util.Vector;
 import com.adventnet.snmp.snmp2.SnmpException;
 import com.adventnet.snmp.snmp2.SnmpOID;
 import com.adventnet.snmp.snmp2.SnmpPDU;
+import com.adventnet.snmp.snmp2.SnmpUnsignedInt;
 import com.adventnet.snmp.snmp2.SnmpVar;
 import com.adventnet.snmp.snmp2.SnmpVarBind;
 
@@ -117,6 +118,20 @@ public final class ArrayResponse<T extends SnmpVar> implements Iterable<T>
     public Iterator<T> iterator()
     {
         return elements.iterator();
+    }
+    
+    /**
+     * Calculates the sum of a response consisting of unsigned integers.
+     */
+    public static long sum(SnmpPDU pdu, SnmpOID arrayPrefix)
+        throws SnmpException
+    {
+        long sum = 0;
+        for (SnmpUnsignedInt value : new ArrayResponse<SnmpUnsignedInt>(pdu,
+                arrayPrefix, 0)) {
+            sum += value.longValue();
+        }
+        return sum;
     }
 }
 

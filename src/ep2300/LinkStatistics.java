@@ -4,6 +4,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.HashSet;
@@ -27,65 +29,45 @@ public final class LinkStatistics implements SnmpClient
         new SnmpOID(".1.3.6.1.2.1.2.2.1.16");
     private static final SnmpOID outPacketsOID =
         new SnmpOID(".1.3.6.1.2.1.2.2.1.17");
+    private static final int numPerResponse = 30;
     
-    public static final class Link
+    public static final class Router
     {
-        public final Interface from;
-        public final Interface to;
+        public final String hostname, address;
+        public List<Long> octets = new LinkedList<Long>();
+        public List<Long> packets = new LinkedList<Long>();
         
-        Link(Interface from, Interface to)
+        Router(String hostname, String address)
         {
-            this.from = from;
-            this.to = to;
-        }
-        
-        Link(String from, String to)
-        {
-            this(new Interface(from), new Interface(to));
-        }
-        
-        public boolean equals(Object _other)
-        {
-            if (_other == null || !(_other instanceof Link)) return false;
-            
-            Link other = (Link)_other;
-            return from.equals(other.from) && to.equals(other.to);
-        }
-    }
-    
-    public static final class Interface
-    {
-        public final String address;
-        public long outOctets;
-        public long outPackets;
-        
-        Interface(String address)
-        {
+            this.hostname = hostname;
             this.address = address;
         }
         
         public boolean equals(Object _other)
         {
-            if (_other == null || !(_other instanceof Interface)) return false;
+            if (_other == null || !(_other instanceof Router)) return false;
             
-            Interface other = (Interface)_other;
-            return address.equals(other.address);
+            Router other = (Router)_other;
+            return hostname.equals(other.hostname);
         }
     }
 
-    private Set<Link> links = new HashSet<Link>();
+    private Map<String,Router> routers = new HashMap<String,Router>();
     
     private AtomicInteger outstandingRequests = new AtomicInteger(0);
 
     public LinkStatistics(Topology topology)
     {
-        Map<String, Set<String>> neighbors = topology.getNeighborTable();
+        /*Map<String, Set<String>> neighbors = topology.getNeighborTable();
         
-        for (String from : neighbors.keySet()) {
-            for (String to : neighbors.get(from)) {
-                links.add(new Link(from, to));
-            }
-        }
+        for (String addr : neighbors.keySet()) {
+            links.add(new Interface(addr));
+        }*/
+        
+        Router r1 = new Router("first", "192.168.1.10");
+        routers.put(r1.address, r1);
+        Router r2 = new Router("other", "192.168.4.10");
+        routers.put(r2.address, r2);
     }
     
     /**
@@ -115,7 +97,7 @@ public final class LinkStatistics implements SnmpClient
             pdu.setNonRepeaters(0);
             //pdu.setMaxRepetitions(1);
             
-            pdu.setMaxRepetitions(30); // should be a constant
+            pdu.setMaxRepetitions(numPerResponse); // should be a constant
 
             pdu.addNull(outOctetsOID); // we also need the interface number
 //            pdu.addNull(outPacketsOID); -- comes directly after outOctetsOID
@@ -142,41 +124,79 @@ public final class LinkStatistics implements SnmpClient
     @Override
     public boolean callback(SnmpSession session, SnmpPDU pdu, int requestID)
     {
-        System.out.println("callback!");
-        UDPProtocolOptions opt = (UDPProtocolOptions) session
-                    .getProtocolOptions();
-        String router = opt.getRemoteAddress().getCanonicalHostName();
-        
-        if (pdu.getErrstat() != 0) { // FIXME is this state reachable?
-            System.out.println("A request has failed:");
-            System.out.println(pdu.getError());
-            return true; // No further processing is needed since the request
-            // failed
-        }
-        else if (pdu.getObjectID(0).toString().equals(".1.3.6.1.6.3.15.1.1.2.0")) {
-            // Try again
-            System.out.println("trying again...");
-            probe(router);
-            return true;
-        }
-        else if (!ArrayResponse.samePrefix(pdu.getObjectID(0), outOctetsOID)) {
-            System.out.println("Invalid response, probing again: "+pdu.getObjectID(0));
-            try {
-                for (int i = 1; ; i++) {
-                    SnmpOID oid = pdu.getObjectID(i);
-                    if (oid == null) break;
-                    System.out.println("\t"+oid);
-                }
-            } catch (Exception e) { }
-            //probe(router);
-            return false;
-        }
-        else {
-            // TODO we should update the link statistics here
-            System.out.println("hello? implement me!");
-            System.out.println(pdu.printVarBinds());
+        try {
+            System.out.println("callback!");
+            UDPProtocolOptions opt = (UDPProtocolOptions) session
+                        .getProtocolOptions();
+            String address = opt.getRemoteAddress().getCanonicalHostName();
             
-            return true; // done processing PDU
+            if (pdu.getErrstat() != 0) { // FIXME is this state reachable?
+                System.out.println("A request has failed:");
+                System.out.println(pdu.getError());
+                return true; // No further processing is needed since the request
+                // failed
+            }
+            else if (pdu.getObjectID(0).toString().equals(".1.3.6.1.6.3.15.1.1.2.0")) {
+                // Try again
+                System.out.println("trying again...");
+                probe(address);
+                return true;
+            }
+            else if (!ArrayResponse.samePrefix(pdu.getObjectID(0), outOctetsOID)) {
+                System.out.println("Invalid response, probing again: "+pdu.getObjectID(0));
+                try {
+                    for (int i = 1; ; i++) {
+                        SnmpOID oid = pdu.getObjectID(i);
+                        if (oid == null) break;
+                        System.out.println("\t"+oid);
+                    }
+                } catch (Exception e) { }
+                //probe(router);
+                
+                return false;
+            }
+            else {
+                Router router = routers.get(address);
+                long octets = 0;
+                long packets = 0;
+                
+                try {
+                    octets = ArrayResponse.sum(pdu, outOctetsOID);
+                    packets = ArrayResponse.sum(pdu, outPacketsOID);
+                } catch (SnmpException e) {
+                    e.printStackTrace();
+                }
+                System.out.println(address+" octets = "+octets+"  packets = "+packets);
+                
+                router.octets.add(octets);
+                router.packets.add(packets);
+                
+                return true; // done processing PDU
+            }
+        }
+        finally {
+            if (outstandingRequests.decrementAndGet() <= 0) {
+                System.out.println("Updated.\n");
+                synchronized(this) { notifyAll(); }
+            }
+        }
+    }
+    
+    public void update()
+    {
+        for (String address : routers.keySet())
+        {
+            probe(address);
+        }
+    }
+    
+    public synchronized void waitUntilFinished()
+    {
+        while (outstandingRequests.get() > 0) {
+            try {
+                wait();
+            }
+            catch (InterruptedException e) { }
         }
     }
 
@@ -211,15 +231,18 @@ public final class LinkStatistics implements SnmpClient
         
         System.out.println("Monitoring...");
         LinkStatistics stats = new LinkStatistics(topo);
-        stats.probe(firstRouter);
+        
+        stats.update();
+        stats.waitUntilFinished();
+        System.out.println("Done, exiting!");
         
         // sleep forever...
-        while (true) {
+        /*while (true) {
             try { Thread.sleep(0); }
             catch (InterruptedException e) { }
-        }
+        }*/
         
-        //UDPSnmpV3.close();
+        UDPSnmpV3.close();
     }
 
 }
