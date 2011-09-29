@@ -52,7 +52,8 @@ public final class LinkStatistics implements SnmpClient
         }
     }
 
-    private Map<String,Router> routers = new HashMap<String,Router>();
+    // XXX maybe it should have getters/setters...
+    public Map<String,Router> routers = new HashMap<String,Router>();
     
     private AtomicInteger outstandingRequests = new AtomicInteger(0);
 
