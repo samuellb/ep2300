@@ -36,8 +36,8 @@ public class Topology implements SnmpClient
             ".1.3.6.1.2.1.4.21.1.7"); // ipRouteNextHop
     private static final int numPerResponse = 30;
 
-    Map<String, Set<String>> neighbors = new HashMap<String, Set<String>>();
-    Set<String> probed = new HashSet<String>();
+    private Map<String, Set<String>> neighbors = new HashMap<String, Set<String>>();
+    private Set<String> probed = new HashSet<String>();
     
     private AtomicInteger outstandingRequests = new AtomicInteger(0);
 
@@ -198,6 +198,11 @@ public class Topology implements SnmpClient
     public void debugPrint(String debugOutput)
     {
         System.err.println("debuging");
+    }
+    
+    public Map<String, Set<String>> getNeighborTable()
+    {
+        return neighbors;
     }
 
     @Override
