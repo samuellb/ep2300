@@ -2,17 +2,15 @@ package ep2300;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.HashSet;
-import java.util.TreeSet;
+import java.util.concurrent.atomic.AtomicInteger;
 
-import com.adventnet.snmp.snmp2.SnmpAPI;
 import com.adventnet.snmp.snmp2.SnmpClient;
 import com.adventnet.snmp.snmp2.SnmpException;
 import com.adventnet.snmp.snmp2.SnmpIpAddress;
@@ -20,33 +18,26 @@ import com.adventnet.snmp.snmp2.SnmpOID;
 import com.adventnet.snmp.snmp2.SnmpPDU;
 import com.adventnet.snmp.snmp2.SnmpSession;
 import com.adventnet.snmp.snmp2.SnmpString;
-import com.adventnet.snmp.snmp2.SnmpVar;
 import com.adventnet.snmp.snmp2.UDPProtocolOptions;
 
-/*
- * TODO In the constructor, create an initial session and request the route
- * table from there.
+/**
+ * Creates a Topology over the given network.
  * 
- * For each respons (in callback im assuming) handle it, if its a new router,
- * ask for its routes, if its a new route, add it to a data structure describing
- * the topology.
- * 
- * The topology will probably be represented with something like map<String,
- * ArrayList<IPs>> where the string is the IP of the router, and the arraylist
- * contains all next-hops of that router.
+ * It does this by probing all routers and its neighbors (basically performing a
+ * tree traversal). It needs to have the sysName included in the response and if
+ * it is not it probes again.
  */
 public class Topology implements SnmpClient
 {
-    private static final int numPerResponse = 30;
-
     private Map<String, Router> routers = new HashMap<String, Router>();
-    private Map<String, String> ipToRouter = new HashMap<String, String>();
     private Set<String> probed = new HashSet<String>();
 
     private AtomicInteger outstandingRequests = new AtomicInteger(0);
 
     /**
      * Start the probing
+     * 
+     * @param firstRouter The router to start probing at
      */
     public Topology(String firstRouter)
     {
@@ -54,6 +45,9 @@ public class Topology implements SnmpClient
         probe(firstRouter);
     }
 
+    /**
+     * Old constructor used for testing purposes
+     */
     @Deprecated
     public Topology()
     {
@@ -116,30 +110,33 @@ public class Topology implements SnmpClient
                                 pdu, SNMP.sysName, SNMP.numPerResponse);
                         // Make sure we get a sysName in the response
                         if (sysArray.getElements().size() > 0) {
-                            String routerName = sysArray.getElements().get(0).toString();
+                            String routerName = sysArray.getElements().get(0)
+                                    .toString();
                             router = routers.get(routerName);
                             if (router == null) {
-                                System.out.println("New router discovered: \t" + routerName);
+                                System.out.println("New router discovered: \t"
+                                        + routerName);
                                 router = new Router(routerName);
                                 routers.put(routerName, router);
                             }
                         }
                         else {
                             System.err
-                                    .println("We didnt get router sysName at the same " +
-                                            "time as we got the first respons from that router!");
+                                    .println("We didnt get router sysName at the same "
+                                            + "time as we got the first respons from that router!");
                             probe(routerIP);
                             return true;
                         }
 
                         // Go through the lists of next hops (=neighbors)
                         ArrayResponse<SnmpIpAddress> respArray = new ArrayResponse<SnmpIpAddress>(
-                                pdu, SNMP.ipRouteNextHop, numPerResponse);
+                                pdu, SNMP.ipRouteNextHop, SNMP.numPerResponse);
 
                         for (SnmpIpAddress addr : respArray) {
                             String addrStr = addr.toString();
-                            if (addrStr.equals(routerIP))
+                            if (addrStr.equals(routerIP)) {
                                 continue;
+                            }
 
                             router.nextHops.add(addrStr);
 
@@ -151,7 +148,8 @@ public class Topology implements SnmpClient
 
                         if (!respArray.reachedEnd()) {
                             // The list is not complete, request more elements
-                            probe(routerIP, SNMP.sysName, respArray.getNextStartOID());
+                            probe(routerIP, SNMP.sysName, respArray
+                                    .getNextStartOID());
                         }
                         else {
                             // We're done
@@ -186,6 +184,9 @@ public class Topology implements SnmpClient
         }
     }
 
+    /**
+     * This method is run until the topology discovery is completed
+     */
     public synchronized void waitUntilFinished()
     {
         while (outstandingRequests.get() > 0) {
@@ -193,6 +194,7 @@ public class Topology implements SnmpClient
                 wait();
             }
             catch (InterruptedException e) {
+                // Nothing to do but continue
             }
         }
     }
@@ -203,7 +205,12 @@ public class Topology implements SnmpClient
         System.err.println("debuging");
     }
 
-    public Map<String, Router> getNeighborTable()
+    /**
+     * Get the router topology
+     * 
+     * @return The topology
+     */
+    public Map<String, Router> getTopology()
     {
         return routers;
     }
@@ -226,6 +233,12 @@ public class Topology implements SnmpClient
         return baos.toString();
     }
 
+    /**
+     * Runs the topology discovery with the defined router as the starting point
+     * of the discovery.
+     * 
+     * @param args CLI args
+     */
     public static void main(String[] args)
     {
         if (args.length != 1) {
