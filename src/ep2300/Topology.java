@@ -39,7 +39,8 @@ public class Topology implements SnmpClient
 {
     private static final int numPerResponse = 30;
 
-    private Map<String, Router> neighbors = new HashMap<String, Router>();
+    private Map<String, Router> routers = new HashMap<String, Router>();
+    private Map<String, String> ipToRouter = new HashMap<String, String>();
     private Set<String> probed = new HashSet<String>();
 
     private AtomicInteger outstandingRequests = new AtomicInteger(0);
@@ -108,22 +109,30 @@ public class Topology implements SnmpClient
                 String routerIP = opt.getRemoteAddress().getCanonicalHostName();
 
                 if (ArrayResponse.samePrefix(pdu.getObjectID(0), SNMP.sysName)) {
-                    // Check if this is a new router
-                    Router router = neighbors.get(routerIP);
-                    if (router == null) {
-                        System.out.println("New router discovered: \t"
-                                + routerIP);
-                        router = new Router(routerIP);
-                        neighbors.put(routerIP, router);
-                    }
-
-                    // Go through the lists of next hops (=neighbors)
                     try {
+                        // Check if this is a new router
+                        Router router;
                         ArrayResponse<SnmpString> sysArray = new ArrayResponse<SnmpString>(
                                 pdu, SNMP.sysName, SNMP.numPerResponse);
-                        if (sysArray.getElements().size() > 0)
-                            router.setSysName(sysArray.getElements().get(0).toString());
-                        
+                        // Make sure we get a sysName in the response
+                        if (sysArray.getElements().size() > 0) {
+                            String routerName = sysArray.getElements().get(0).toString();
+                            router = routers.get(routerName);
+                            if (router == null) {
+                                System.out.println("New router discovered: \t" + routerName);
+                                router = new Router(routerName);
+                                routers.put(routerName, router);
+                            }
+                        }
+                        else {
+                            System.err
+                                    .println("We didnt get router sysName at the same " +
+                                            "time as we got the first respons from that router!");
+                            probe(routerIP);
+                            return true;
+                        }
+
+                        // Go through the lists of next hops (=neighbors)
                         ArrayResponse<SnmpIpAddress> respArray = new ArrayResponse<SnmpIpAddress>(
                                 pdu, SNMP.ipRouteNextHop, numPerResponse);
 
@@ -142,7 +151,7 @@ public class Topology implements SnmpClient
 
                         if (!respArray.reachedEnd()) {
                             // The list is not complete, request more elements
-                            probe(routerIP, respArray.getNextStartOID());
+                            probe(routerIP, SNMP.sysName, respArray.getNextStartOID());
                         }
                         else {
                             // We're done
@@ -167,7 +176,7 @@ public class Topology implements SnmpClient
             }
         }
         finally {
-//            System.out.println(outstandingRequests);
+            // System.out.println(outstandingRequests);
             if (outstandingRequests.decrementAndGet() <= 0) {
                 System.out.println("Discovery finished.\n\n");
                 synchronized (this) {
@@ -196,7 +205,7 @@ public class Topology implements SnmpClient
 
     public Map<String, Router> getNeighborTable()
     {
-        return neighbors;
+        return routers;
     }
 
     @Override
@@ -204,8 +213,10 @@ public class Topology implements SnmpClient
     {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         PrintStream out = new PrintStream(baos);
-        for (String routerIP : neighbors.keySet()) {
-            Router router = neighbors.get(routerIP);
+        List<String> routerIPs = new ArrayList<String>(routers.keySet());
+        Collections.sort(routerIPs);
+        for (String routerIP : routerIPs) {
+            Router router = routers.get(routerIP);
             out.printf("%s (%s):\n", routerIP, router.getSysName());
             for (String nextHop : router.nextHops) {
                 out.println("\t" + nextHop);

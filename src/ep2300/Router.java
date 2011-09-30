@@ -3,20 +3,15 @@ package ep2300;
 import java.util.HashSet;
 import java.util.Set;
 
-public class Router
+public class Router implements Comparable<Router>
 {
     private String sysName;
     private String description;
     private String ip;
     public Set<String> nextHops;
-    public Router(String ip) {
+    public Router(String sysName) {
         nextHops = new HashSet<String>();
-        this.ip = ip;
-    }
-    
-    public void setSysName(String hostName)
-    {
-        this.sysName = hostName;
+        this.sysName = sysName;
     }
     public String getSysName()
     {
@@ -33,5 +28,10 @@ public class Router
     public String getIp()
     {
         return ip;
+    }
+    @Override
+    public int compareTo(Router obj)
+    {
+        return sysName.compareTo(obj.getSysName());
     }
 }
