@@ -62,7 +62,11 @@ public class ClusteringMonitor
             long startTime = System.currentTimeMillis();
             
             stats.update();
-            stats.waitUntilFinished();
+            int unfinished = stats.waitUntilFinished(interval);
+            if (unfinished > 0) {
+                System.out.println("unfinished requests: "+unfinished);
+            }
+            
             Collection<Router> routers = stats.getTopology().getTopology().values();
             
             long octetSum = 0, packetSum = 0;

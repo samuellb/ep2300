@@ -120,15 +120,27 @@ public final class LinkStatistics implements SnmpClient
         }
     }
     
-    public synchronized void waitUntilFinished()
+    /**
+     * Waits until all requests have finished, or at most timeout
+     * milliseconds. Returns the number of unfinished requests.
+     */
+    public synchronized int waitUntilFinished(long timeout)
     {
+        long start = System.currentTimeMillis();
+        
         while (outstandingRequests.get() > 0) {
             try {
-                wait();
+                long delay = System.currentTimeMillis() - start;
+                
+                if (delay <= 0) break;
+                
+                wait(timeout - delay);
             }
             catch (InterruptedException e) { }
         }
+        
         UDPSnmpV3.close();
+        return outstandingRequests.get();
     }
 
     
@@ -187,7 +199,10 @@ public final class LinkStatistics implements SnmpClient
             System.out.println("Updating...");
             stats.update();
             System.out.println(stats);
-            stats.waitUntilFinished();
+            int unfinished = stats.waitUntilFinished(1000);
+            if (unfinished > 0) {
+                System.out.println("unfinished requests: "+unfinished);
+            }
             
             try { Thread.sleep(1000); }
             catch (InterruptedException e) { }
