@@ -1,9 +1,31 @@
 package ep2300;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 public class ClusteringMonitor
 {
+    
+    private static class RouterMean
+    {
+        public final Router router;
+        public final long octets;
+        public final long packets;
+        
+        public RouterMean(Router router, long octets, long packets)
+        {
+            this.router = router;
+            this.octets = octets;
+            this.packets = packets;
+        }
+        
+        @Override
+        public String toString()
+        {
+            return router.getSysName() + "(" + octets + "," + packets + ")";
+        }
+    }
     
     private final LinkStatistics stats;
     private final int interval;
@@ -33,6 +55,7 @@ public class ClusteringMonitor
             long octetMean, packetMean;
             
             // Calculate mean values
+            List<RouterMean> means = new ArrayList<RouterMean>();
             for (Router router : stats.getTopology().getTopology().values()) {
                 Iterator<Long> it;
                 long sum;
@@ -48,11 +71,42 @@ public class ClusteringMonitor
                     sum += it.next();
                 }
                 packetMean = sum / router.packets.size();
+                
+                means.add(new RouterMean(router, octetMean, packetMean));
             }
             
-            // TODO k-means clustering
+            // k-means clustering
+            KMeans km = new KMeans<RouterMean>(means, 3)
+            {
+                private long square(long a) {
+                    return a*a;
+                }
+                
+                @Override
+                public double distance(RouterMean a, RouterMean b) {
+                    return Math.sqrt(
+                        square(Math.abs(a.octets - b.octets)) +
+                        square(Math.abs(a.packets - b.packets)));
+                }
+                
+                @Override
+                public RouterMean getMean(List<RouterMean> list) {
+                    int size = list.size();
+                    long octetMean = 0;
+                    long packetMean = 0;
+                    for (RouterMean elem : list) {
+                        octetMean += elem.octets;
+                        packetMean += elem.packets;
+                    }
+                    return new RouterMean(null, octetMean/size, packetMean/size);
+                }
+            };
+            
+            km.updateClusters(10);
             
             // TODO process results (output, or analyze in task 3)
+            System.out.println("-----------------------------------------");
+            km.printClusters(); // we should analyze which cluster is which
             
             long workDuration = System.currentTimeMillis() - startTime;
             
