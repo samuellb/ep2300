@@ -87,8 +87,8 @@
   <target name="run-clusteringmonitor" depends="compile">
     <java classname="ep2300.ClusteringMonitor" fork="true">
       <arg value="192.168.1.10" />
-      <arg value="2000" />
-      <arg value="6000" />
+      <arg value="1500" />
+      <arg value="20000" />
       <arg value="3" />
       <classpath>
         <path refid="snmp.path" />

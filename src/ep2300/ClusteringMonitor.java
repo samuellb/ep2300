@@ -1,21 +1,22 @@
 package ep2300;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
 public class ClusteringMonitor
 {
     
-    private static class RouterMean
+    private static class TimeStep
     {
-        public final Router router;
+        public final int step;
         public final long octets;
         public final long packets;
         
-        public RouterMean(Router router, long octets, long packets)
+        public TimeStep(int step, long octets, long packets)
         {
-            this.router = router;
+            this.step = step;
             this.octets = octets;
             this.packets = packets;
         }
@@ -23,7 +24,7 @@ public class ClusteringMonitor
         @Override
         public String toString()
         {
-            return router.getSysName() + "(" + octets + "," + packets + ")";
+            return step+"(" + octets + "," + packets + ")";
         }
     }
     
@@ -32,6 +33,7 @@ public class ClusteringMonitor
     private final int timespan;
     private final int numClusters;
     private final int numTimeSteps;
+    private List<TimeStep> means = new ArrayList<TimeStep>();
     
     
     public ClusteringMonitor(LinkStatistics stats, int interval, int timespan, int numClusters)
@@ -51,62 +53,25 @@ public class ClusteringMonitor
             
             stats.update();
             stats.waitUntilFinished();
+            Collection<Router> routers = stats.getTopology().getTopology().values();
             
-            long octetMean, packetMean;
+            long octetSum = 0, packetSum = 0;
             
             // Calculate mean values
-            List<RouterMean> means = new ArrayList<RouterMean>();
-            for (Router router : stats.getTopology().getTopology().values()) {
+            for (Router router : routers) {
                 Iterator<Long> it;
-                long sum;
                 it = router.octets.iterator();
-                sum = 0;
                 while (it.hasNext()) {
-                    sum += it.next();
+                    octetSum += it.next();
                 }
-                octetMean = sum / router.octets.size();
                 it = router.packets.iterator();
-                sum = 0;
                 while (it.hasNext()) {
-                    sum += it.next();
+                    packetSum += it.next();
                 }
-                packetMean = sum / router.packets.size();
-                
-                means.add(new RouterMean(router, octetMean, packetMean));
             }
             
-            // k-means clustering
-            KMeans km = new KMeans<RouterMean>(means, 3)
-            {
-                private long square(long a) {
-                    return a*a;
-                }
-                
-                @Override
-                public double distance(RouterMean a, RouterMean b) {
-                    return Math.sqrt(
-                        square(Math.abs(a.octets - b.octets)) +
-                        square(Math.abs(a.packets - b.packets)));
-                }
-                
-                @Override
-                public RouterMean getMean(List<RouterMean> list) {
-                    int size = list.size();
-                    long octetMean = 0;
-                    long packetMean = 0;
-                    for (RouterMean elem : list) {
-                        octetMean += elem.octets;
-                        packetMean += elem.packets;
-                    }
-                    return new RouterMean(null, octetMean/size, packetMean/size);
-                }
-            };
-            
-            km.updateClusters(10);
-            
-            // TODO process results (output, or analyze in task 3)
-            System.out.println("-----------------------------------------");
-            km.printClusters(); // we should analyze which cluster is which
+            int numRouters = routers.size();
+            means.add(new TimeStep(t, octetSum/numRouters, packetSum/numRouters));
             
             long workDuration = System.currentTimeMillis() - startTime;
             
@@ -116,6 +81,51 @@ public class ClusteringMonitor
                 catch (InterruptedException e) { }
             }
         }
+        
+        // Analyze the results
+        KMeans<TimeStep> km = calculateKMeans();
+        printKMeans(km);
+    }
+    
+    private KMeans<TimeStep> calculateKMeans()
+    {
+        // k-means clustering
+        KMeans<TimeStep> km = new KMeans<TimeStep>(means, numClusters)
+        {
+            private long square(long a) {
+                return a*a;
+            }
+            
+            @Override
+            public double distance(TimeStep a, TimeStep b) {
+                return Math.sqrt(
+                    square(Math.abs(a.octets - b.octets)) +
+                    square(Math.abs(a.packets - b.packets)));
+            }
+            
+            @Override
+            public TimeStep getMean(List<TimeStep> list) {
+                int size = list.size();
+                long octetMean = 0;
+                long packetMean = 0;
+                for (TimeStep elem : list) {
+                    octetMean += elem.octets;
+                    packetMean += elem.packets;
+                }
+                return new TimeStep(-1, octetMean/size, packetMean/size);
+            }
+        };
+        
+        km.updateClusters(10);
+        
+        return km;
+    }
+    
+    private void printKMeans(KMeans<TimeStep> km)
+    {
+            // TODO process results (output, or analyze in task 3)
+            System.out.println("-----------------------------------------");
+            km.printClusters(); // maybe we should analyze which cluster is which
     }
     
     public static void main(String[] args)
