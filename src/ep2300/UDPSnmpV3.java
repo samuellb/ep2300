@@ -2,11 +2,13 @@ package ep2300;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.adventnet.snmp.snmp2.ProtocolOptions;
 import com.adventnet.snmp.snmp2.SnmpAPI;
+import com.adventnet.snmp.snmp2.SnmpClient;
 import com.adventnet.snmp.snmp2.SnmpException;
 import com.adventnet.snmp.snmp2.SnmpSession;
 import com.adventnet.snmp.snmp2.UDPProtocolOptions;
@@ -14,6 +16,22 @@ import com.adventnet.snmp.snmp2.usm.USMUserEntry;
 import com.adventnet.snmp.snmp2.usm.USMUtils;
 
 public class UDPSnmpV3 {
+    
+    public final static class Result
+    {
+        private final SnmpSession session;
+        private final int clientId;
+        
+        private Result(SnmpSession session, int clientId)
+        {
+            this.session = session;
+            this.clientId = clientId;
+        }
+        
+        public SnmpSession getSession() { return session; }
+        public int getClientId() { return clientId; }
+    }
+    
     
     private UDPSnmpV3() { } // static class
     
@@ -32,8 +50,40 @@ public class UDPSnmpV3 {
     private static AtomicInteger successfulConnections = new AtomicInteger();
     private static AtomicInteger attemptedConnections = new AtomicInteger();
     
+    
+    public static Result createSession(String address,
+            SnmpClient client) throws SnmpException {
+        return createSession(address, client, username, password);
+    }
+    
     public static SnmpSession createSession(String address) throws SnmpException {
         return createSession(address, username, password);
+    }
+    
+    public static Result createSession(String address, SnmpClient client,
+            String username, String password) throws SnmpException {
+        
+        SnmpSession session = createSession(address, username, password);
+        
+        // Check if the client has been registered already
+        int id = -1;
+        boolean registered = false;
+        Hashtable clients = session.getSnmpClientsWithID();
+        for (Object elem : clients.keySet()) {
+            Integer mapId = (Integer)elem;
+            if (clients.get(mapId) == client) {
+                id = mapId;
+                registered = true;
+                break;
+            }
+        }
+        
+        if (!registered) {
+            // register a new session
+            id = session.addSnmpClientWithID(client);
+        }
+        
+        return new Result(session, id);
     }
     
     /**

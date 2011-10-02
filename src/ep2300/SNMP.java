@@ -55,8 +55,11 @@ public class SNMP
     {
         int requests = 0;
         SnmpSession session = null;
+        int id = -1;
         try {
-            session = UDPSnmpV3.createSession(ip); // Begin here
+            UDPSnmpV3.Result res = UDPSnmpV3.createSession(ip, client); // Begin here
+            session = res.getSession();
+            id = res.getClientId();
         }
         catch (SnmpException e) {
             System.err.println("Could not start session to ip " + ip + ": "
@@ -64,7 +67,7 @@ public class SNMP
             // e.printStackTrace();
         }
         if (session != null) { // Should always happen
-            int id = session.addSnmpClientWithID(client);
+            //int id = session.addSnmpClientWithID(client);
             SnmpPDU pdu = new SnmpPDU();
             pdu.setCommand(SnmpAPI.GETBULK_REQ_MSG);
             pdu.setClientID(id);
