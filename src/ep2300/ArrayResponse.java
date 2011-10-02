@@ -54,7 +54,7 @@ public final class ArrayResponse<T extends SnmpVar> implements Iterable<T>
                 continue;
             }
             
-            if (!samePrefix(oid, arrayPrefix)) {
+            if (!SNMP.samePrefix(oid, arrayPrefix)) {
                 // Reached something that's not in the array.
                 // This also means that we reached the end.
                 reachedEnd = true;
@@ -74,22 +74,6 @@ public final class ArrayResponse<T extends SnmpVar> implements Iterable<T>
         this.elements = elements;
         this.lastOID = lastOID;
         this.reachedEnd = reachedEnd;
-    }
-    
-    /**
-     * Checks whether oid starts with prefix. For example:
-     *
-     *   samePrefix("1.2.1", "1.2") == true
-     *   samePrefix("1.3",   "1.2") == false
-     *   samePrefix("1.2",   "1.2") == true
-     *   
-     *   TODO Should this be moved somewhere else? its used in Topology.
-     */
-    static boolean samePrefix(SnmpOID oid, SnmpOID prefix)
-    {
-        String os = oid.toString()+".";
-        String ps = prefix.toString()+".";
-        return os.startsWith(ps);
     }
     
     public boolean reachedEnd()

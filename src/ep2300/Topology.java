@@ -102,7 +102,7 @@ public class Topology implements SnmpClient
                         .getProtocolOptions();
                 String routerIP = opt.getRemoteAddress().getCanonicalHostName();
 
-                if (ArrayResponse.samePrefix(pdu.getObjectID(0), SNMP.sysName)) {
+                if (SNMP.samePrefix(pdu.getObjectID(0), SNMP.sysName)) {
                     try {
                         // Check if this is a new router
                         Router router;

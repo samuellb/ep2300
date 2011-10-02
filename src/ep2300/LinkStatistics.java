@@ -29,8 +29,8 @@ public final class LinkStatistics implements SnmpClient
     public Map<String,Router> routers = new HashMap<String,Router>();
     
     private AtomicInteger outstandingRequests = new AtomicInteger(0);
-
-    public LinkStatistics(Topology topology)
+    
+    public LinkStatistics()
     {
         /*Map<String, Set<String>> neighbors = topology.getNeighborTable();
         
@@ -44,6 +44,11 @@ public final class LinkStatistics implements SnmpClient
         routers.put(r2.getIP(), r2);
     }
     
+    public LinkStatistics(Topology topology) {
+        // TODO
+        this();
+    }
+    
     /**
      * Probe an IP for updated statistics.
      * 
@@ -51,39 +56,7 @@ public final class LinkStatistics implements SnmpClient
      */
     private void probe(String ip)
     {
-        SnmpSession session = null;
-        try {
-            session = UDPSnmpV3.createSession(ip); // Begin here
-        }
-        catch (SnmpException e) {
-            System.err.println("Could not start session to ip " + ip + ": "
-                    + e.getMessage());
-            // e.printStackTrace();
-        }
-        if (session != null) { // Should always happen
-            int id = session.addSnmpClientWithID(this);
-            SnmpPDU pdu = new SnmpPDU();
-            pdu.setCommand(SnmpAPI.GETBULK_REQ_MSG);
-            //pdu.setCommand(SnmpAPI.GET_REQ_MSG);
-            pdu.setClientID(id);
-            
-            // (nr=2, mr=0) should also work... but neither works.
-            pdu.setNonRepeaters(0);
-            //pdu.setMaxRepetitions(1);
-            
-            pdu.setMaxRepetitions(SNMP.numPerResponse); // should be a constant
-
-            pdu.addNull(SNMP.outOctetsOID); // we also need the interface number
-//            pdu.addNull(outPacketsOID); -- comes directly after outOctetsOID
-            try {
-                outstandingRequests.incrementAndGet();
-                session.send(pdu);
-            }
-            catch (SnmpException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        }
+        outstandingRequests.addAndGet(SNMP.sendOID(ip, this, SNMP.outOctetsOID));
     }
 
     @Override
@@ -110,13 +83,12 @@ public final class LinkStatistics implements SnmpClient
                 return true; // No further processing is needed since the request
                 // failed
             }
-            else if (pdu.getObjectID(0).toString().equals(".1.3.6.1.6.3.15.1.1.2.0")) {
+            else if (pdu.getObjectID(0).equals(SNMP.usmStatsNotInTimeWindows)) {
                 // Try again
-                System.out.println("trying again...");
                 probe(address);
                 return true;
             }
-            else if (!ArrayResponse.samePrefix(pdu.getObjectID(0), SNMP.outOctetsOID)) {
+            else if (!SNMP.samePrefix(pdu.getObjectID(0), SNMP.outOctetsOID)) {
                 System.out.println("Invalid response, probing again: "+pdu.getObjectID(0));
                 try {
                     for (int i = 1; ; i++) {

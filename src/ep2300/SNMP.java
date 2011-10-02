@@ -33,6 +33,11 @@ public class SNMP
             ".1.3.6.1.2.1.2.2.1.17");
 
     /**
+     * Error OID
+     */
+    public static final SnmpOID usmStatsNotInTimeWindows = new SnmpOID(".1.3.6.1.6.3.15.1.1.2.0");
+    
+    /**
      * The number of responses in each query.
      */
     public static final int numPerResponse = 30;
@@ -79,5 +84,21 @@ public class SNMP
             }
         }
         return requests;
+    }
+
+    /**
+     * Checks whether oid starts with prefix. For example:
+     * 
+     * samePrefix("1.2.1", "1.2") == true
+     * samePrefix("1.3", "1.2") == false
+     * samePrefix("1.2", "1.2") == true
+     * 
+     * TODO Should this be moved somewhere else? its used in Topology.
+     */
+    static boolean samePrefix(SnmpOID oid, SnmpOID prefix)
+    {
+        String os = oid.toString() + ".";
+        String ps = prefix.toString() + ".";
+        return os.startsWith(ps);
     }
 }
