@@ -25,27 +25,6 @@ import com.adventnet.snmp.snmp2.UDPProtocolOptions;
  */
 public final class LinkStatistics implements SnmpClient
 {   
-    public static final class Router
-    {
-        public final String hostname, address;
-        public List<Long> octets = new LinkedList<Long>();
-        public List<Long> packets = new LinkedList<Long>();
-        
-        Router(String hostname, String address)
-        {
-            this.hostname = hostname;
-            this.address = address;
-        }
-        
-        public boolean equals(Object _other)
-        {
-            if (_other == null || !(_other instanceof Router)) return false;
-            
-            Router other = (Router)_other;
-            return hostname.equals(other.hostname);
-        }
-    }
-
     // XXX maybe it should have getters/setters...
     public Map<String,Router> routers = new HashMap<String,Router>();
     
@@ -60,9 +39,9 @@ public final class LinkStatistics implements SnmpClient
         }*/
         
         Router r1 = new Router("first", "192.168.1.10");
-        routers.put(r1.address, r1);
+        routers.put(r1.getIP(), r1);
         Router r2 = new Router("other", "192.168.4.10");
-        routers.put(r2.address, r2);
+        routers.put(r2.getIP(), r2);
     }
     
     /**
@@ -224,7 +203,7 @@ public final class LinkStatistics implements SnmpClient
         Topology topo = new Topology(firstRouter);
         topo.waitUntilFinished();
         
-        System.out.println("Monitoring...\n");
+        System.out.println("Monitoring...");
         LinkStatistics stats = new LinkStatistics(topo);
         
         while (true) {

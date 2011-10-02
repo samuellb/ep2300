@@ -116,7 +116,7 @@ public class Topology implements SnmpClient
                             if (router == null) {
                                 System.out.println("New router discovered: \t"
                                         + routerName);
-                                router = new Router(routerName);
+                                router = new Router(routerName, routerIP);
                                 routers.put(routerName, router);
                             }
                         }
