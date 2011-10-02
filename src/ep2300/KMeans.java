@@ -119,7 +119,9 @@ public abstract class KMeans<T>
         List<List<T>> clusters = getClusters();
         for (int ki = 0; ki < k; ki++) {
             // Calculate mean inside this cluster
-            T mean = getMean(clusters.get(ki));
+            List<T> cluster = clusters.get(ki);
+            if (cluster.size() == 0) continue;
+            T mean = getMean(cluster);
             
             // Find closest sample
             int closest = 0;
