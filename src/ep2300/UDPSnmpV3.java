@@ -119,6 +119,10 @@ public class UDPSnmpV3 {
     }
     
     public static void close() {
+        for (SnmpSession session : sessions.values()) {
+            session.close();
+        }
+        sessions.clear();
         // TODO Go through the sessions and close them (perhaps unnescesary?)
         api.close();
     }

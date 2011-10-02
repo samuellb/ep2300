@@ -18,7 +18,7 @@ public class Router implements Comparable<Router>
      * The interfaces connected to this router
      */
     public Set<String> nextHops;
-    
+
     public List<Long> octets = new LinkedList<Long>();
     public List<Long> packets = new LinkedList<Long>();
 
@@ -73,6 +73,12 @@ public class Router implements Comparable<Router>
     public String getIP()
     {
         return ip;
+    }
+
+    @Override
+    public String toString()
+    {
+        return sysName;
     }
 
     @Override

@@ -29,7 +29,15 @@ import com.adventnet.snmp.snmp2.UDPProtocolOptions;
  */
 public class Topology implements SnmpClient
 {
+    /**
+     * A mapping between router names and routers, preferably unique
+     */
     private Map<String, Router> routers = new HashMap<String, Router>();
+    
+    /**
+     * A mapping from an IP to a router, each router can have several IPs.
+     */
+    private Map<String, Router> IPToRouter = new HashMap<String, Router>();
     private Set<String> probed = new HashSet<String>();
 
     private AtomicInteger outstandingRequests = new AtomicInteger(0);
@@ -119,6 +127,7 @@ public class Topology implements SnmpClient
                                 router = new Router(routerName, routerIP);
                                 routers.put(routerName, router);
                             }
+                            IPToRouter.put(routerIP, router);
                         }
                         else {
                             System.err
@@ -197,6 +206,7 @@ public class Topology implements SnmpClient
                 // Nothing to do but continue
             }
         }
+        UDPSnmpV3.close();
     }
 
     @Override
@@ -213,6 +223,16 @@ public class Topology implements SnmpClient
     public Map<String, Router> getTopology()
     {
         return routers;
+    }
+    
+    /**
+     * Return the Router associated with the specified address
+     * @param address The IP of the router
+     * @return The Router listening to the address
+     */
+    public Router getRouterFromIP(String address)
+    {
+        return IPToRouter.get(address);
     }
 
     @Override

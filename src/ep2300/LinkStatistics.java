@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -25,28 +26,12 @@ import com.adventnet.snmp.snmp2.UDPProtocolOptions;
  */
 public final class LinkStatistics implements SnmpClient
 {   
-    // XXX maybe it should have getters/setters...
-    public Map<String,Router> routers = new HashMap<String,Router>();
+    private Topology topology;
     
     private AtomicInteger outstandingRequests = new AtomicInteger(0);
     
-    public LinkStatistics()
-    {
-        /*Map<String, Set<String>> neighbors = topology.getNeighborTable();
-        
-        for (String addr : neighbors.keySet()) {
-            links.add(new Interface(addr));
-        }*/
-        
-        Router r1 = new Router("first", "192.168.1.10");
-        routers.put(r1.getIP(), r1);
-        Router r2 = new Router("other", "192.168.4.10");
-        routers.put(r2.getIP(), r2);
-    }
-    
     public LinkStatistics(Topology topology) {
-        // TODO
-        this();
+        this.topology = topology;
     }
     
     /**
@@ -72,7 +57,6 @@ public final class LinkStatistics implements SnmpClient
     public boolean callback(SnmpSession session, SnmpPDU pdu, int requestID)
     {
         try {
-            System.out.println("callback!");
             UDPProtocolOptions opt = (UDPProtocolOptions) session
                         .getProtocolOptions();
             String address = opt.getRemoteAddress().getCanonicalHostName();
@@ -85,7 +69,7 @@ public final class LinkStatistics implements SnmpClient
             }
             else if (pdu.getObjectID(0).equals(SNMP.usmStatsNotInTimeWindows)) {
                 // Try again
-                probe(address);
+//                probe(address);
                 return true;
             }
             else if (!SNMP.samePrefix(pdu.getObjectID(0), SNMP.outOctetsOID)) {
@@ -102,7 +86,7 @@ public final class LinkStatistics implements SnmpClient
                 return false;
             }
             else {
-                Router router = routers.get(address);
+                Router router = topology.getRouterFromIP(address);
                 long octets = 0;
                 long packets = 0;
                 
@@ -112,7 +96,7 @@ public final class LinkStatistics implements SnmpClient
                 } catch (SnmpException e) {
                     e.printStackTrace();
                 }
-                System.out.println(address+" octets = "+octets+"  packets = "+packets);
+//                System.out.println(address+" octets = "+octets+"  packets = "+packets);
                 
                 router.octets.add(octets);
                 router.packets.add(packets);
@@ -122,7 +106,6 @@ public final class LinkStatistics implements SnmpClient
         }
         finally {
             if (outstandingRequests.decrementAndGet() <= 0) {
-                System.out.println("Updated.\n");
                 synchronized(this) { notifyAll(); }
             }
         }
@@ -130,9 +113,9 @@ public final class LinkStatistics implements SnmpClient
     
     public void update()
     {
-        for (String address : routers.keySet())
+        for (Router address : topology.getTopology().values())
         {
-            probe(address);
+            probe(address.getIP());
         }
     }
     
@@ -144,6 +127,7 @@ public final class LinkStatistics implements SnmpClient
             }
             catch (InterruptedException e) { }
         }
+        UDPSnmpV3.close();
     }
 
     @Override
@@ -155,8 +139,17 @@ public final class LinkStatistics implements SnmpClient
     @Override
     public String toString()
     {
-        // TODO
-        throw new UnsupportedOperationException("Not implemented");
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        PrintStream out = new PrintStream(baos);
+        for (Router router : topology.getTopology().values()) {
+            out.printf("%s (%s):\n", router, router.getIP());
+            Iterator<Long> octets = router.octets.iterator();
+            Iterator<Long> packets = router.octets.iterator();
+            while (octets.hasNext() && packets.hasNext()) {
+                out.printf("\t%dB (%s packets)\n", octets.next(), packets.next());
+            }
+        }
+        return baos.toString();
     }
     
     /**
@@ -181,6 +174,7 @@ public final class LinkStatistics implements SnmpClient
         while (true) {
             System.out.println("Updating...");
             stats.update();
+            System.out.println(stats);
             stats.waitUntilFinished();
             
             try { Thread.sleep(1000); }
