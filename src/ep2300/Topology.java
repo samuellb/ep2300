@@ -124,10 +124,12 @@ public class Topology implements SnmpClient
                             if (router == null) {
                                 System.out.println("New router discovered: \t"
                                         + routerName);
-                                router = new Router(routerName, routerIP);
+                                router = new Router(routerName);
+                                router.addIP(routerIP);
                                 routers.put(routerName, router);
                             }
                             IPToRouter.put(routerIP, router);
+                            router.addIP(routerIP);
                         }
                         else {
                             System.err
@@ -244,7 +246,10 @@ public class Topology implements SnmpClient
         Collections.sort(routerList);
         for (String hostname : routerList) {
             Router router = routers.get(hostname);
-            out.printf("%s:\n", hostname);
+            out.printf("%s: ( ", hostname);
+            for (String ip : router.ips)
+                out.printf("%s ", ip);
+            out.printf(")\n");
             for (String nextHop : router.nextHops) {
                 // Print neighbor
                 if (IPToRouter.get(nextHop) == router) continue;

@@ -1,5 +1,6 @@
 package ep2300;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -12,7 +13,6 @@ public class Router implements Comparable<Router>
 {
     private String sysName;
     private String description;
-    private String ip;
 
     /**
      * The interfaces connected to this router
@@ -21,6 +21,11 @@ public class Router implements Comparable<Router>
 
     public List<Long> octets = new LinkedList<Long>();
     public List<Long> packets = new LinkedList<Long>();
+    
+    /**
+     * Containing all the IPs to this router.
+     */
+    public Set<String> ips = new HashSet<String>();
 
     /**
      * Create a new router
@@ -28,11 +33,10 @@ public class Router implements Comparable<Router>
      * @param sysName The name of the router
      * @param ip One IP to connect to the router at
      */
-    public Router(String sysName, String ip)
+    public Router(String sysName)
     {
         nextHops = new HashSet<String>();
         this.sysName = sysName;
-        this.ip = ip;
     }
 
     /**
@@ -72,7 +76,15 @@ public class Router implements Comparable<Router>
      */
     public String getIP()
     {
-        return ip;
+        return ips.iterator().next();
+    }
+
+    /**
+     * Add an IP to this router
+     * @param ip The IP to add
+     */
+    public void addIP(String ip) {
+        ips.add(ip);
     }
 
     @Override
