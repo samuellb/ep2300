@@ -240,13 +240,15 @@ public class Topology implements SnmpClient
     {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         PrintStream out = new PrintStream(baos);
-        List<String> routerIPs = new ArrayList<String>(routers.keySet());
-        Collections.sort(routerIPs);
-        for (String routerIP : routerIPs) {
-            Router router = routers.get(routerIP);
-            out.printf("%s (%s):\n", routerIP, router.getSysName());
+        List<String> routerList = new ArrayList<String>(routers.keySet());
+        Collections.sort(routerList);
+        for (String hostname : routerList) {
+            Router router = routers.get(hostname);
+            out.printf("%s:\n", hostname);
             for (String nextHop : router.nextHops) {
-                out.println("\t" + nextHop);
+                // Print neighbor
+                if (IPToRouter.get(nextHop) == router) continue;
+                out.println("\t" + nextHop + " (" + IPToRouter.get(nextHop) + ")");
             }
             out.println();
         }
