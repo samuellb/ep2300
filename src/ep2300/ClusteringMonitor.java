@@ -1,5 +1,7 @@
 package ep2300;
 
+import java.util.Iterator;
+
 public class ClusteringMonitor
 {
     
@@ -28,7 +30,25 @@ public class ClusteringMonitor
             stats.update();
             stats.waitUntilFinished();
             
-            // TODO calculate mean value
+            long octetMean, packetMean;
+            
+            // Calculate mean values
+            for (Router router : stats.getTopology().getTopology().values()) {
+                Iterator<Long> it;
+                long sum;
+                it = router.octets.iterator();
+                sum = 0;
+                while (it.hasNext()) {
+                    sum += it.next();
+                }
+                octetMean = sum / router.octets.size();
+                it = router.packets.iterator();
+                sum = 0;
+                while (it.hasNext()) {
+                    sum += it.next();
+                }
+                packetMean = sum / router.packets.size();
+            }
             
             // TODO k-means clustering
             

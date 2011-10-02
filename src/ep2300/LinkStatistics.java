@@ -130,6 +130,17 @@ public final class LinkStatistics implements SnmpClient
         UDPSnmpV3.close();
     }
 
+    
+    /**
+     * Get the topology of the network
+     * 
+     * @return The network topology
+     */
+    public Topology getTopology()
+    {
+        return topology;
+    }
+
     @Override
     public void debugPrint(String debugOutput)
     {
