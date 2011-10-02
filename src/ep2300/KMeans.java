@@ -147,6 +147,16 @@ public abstract class KMeans<T>
         }
     }
     
+    /**
+     * Runs multiple iterations.
+     */
+    public void updateClusters(int iterations)
+    {
+        for (int i = 0; i < iterations; i++) {
+            updateClusters();
+        }
+    }
+    
     public static void main(String[] args)
     {
         List<Integer> samples = new ArrayList<Integer>();
