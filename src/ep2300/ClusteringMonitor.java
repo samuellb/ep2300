@@ -78,8 +78,8 @@ public class ClusteringMonitor
             }
             
             int numRouters = routers.size();
-            long octetMean = octetSum/numRouters;
             long packetMean = packetSum/numRouters;
+            long octetMean = (octetSum/numRouters) / packetMean;
             
             if (t > 0) {
                 System.out.println(t+": "+octetMean+" "+packetMean);
