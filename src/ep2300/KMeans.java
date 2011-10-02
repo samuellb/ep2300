@@ -101,6 +101,19 @@ public abstract class KMeans<T>
         return clusters;
     }
     
+    public void printClusters()
+    {
+        List<List<T>> clusters = getClusters();
+        for (List<T> cluster : clusters) {
+            System.out.println("cluster:");
+            System.out.print("  ");
+            for (T sample : cluster) {
+                System.out.print("  "+sample);
+            }
+            System.out.println();
+        }
+    }
+    
     public void updateClusters()
     {
         List<List<T>> clusters = getClusters();
@@ -162,16 +175,7 @@ public abstract class KMeans<T>
             System.out.println("------------------------------------------");
             System.out.println("iteration: " + iter);
             System.out.println();
-            
-            List<List<Integer>> clusters = km.getClusters();
-            for (List<Integer> cluster : clusters) {
-                System.out.println("cluster:");
-                System.out.print("  ");
-                for (Integer sample : cluster) {
-                    System.out.print("  "+sample);
-                }
-                System.out.println();
-            }
+            km.printClusters();
             
             System.out.println();
             km.updateClusters();
