@@ -143,10 +143,12 @@ public abstract class KMeans<T>
         }
         
         KMeans<Integer> km = new KMeans<Integer>(samples, 3) {
+            @Override
             public double distance(Integer a, Integer b) {
                 return Math.abs(a - b);
             }
             
+            @Override
             public Integer getMean(List<Integer> list) {
                 int mean = 0;
                 for (int elem : list) {
