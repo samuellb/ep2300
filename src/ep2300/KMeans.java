@@ -35,38 +35,16 @@ public abstract class KMeans<T>
     }
     
     /**
-     * Converts an object to a numeric value. Must be implemented by
-     * user of this class.
+     * Calculates the distance between two samples. Must be implemented by
+     * users of this class.
      */
-    public abstract double getValue(T a);
+    public abstract double distance(T a, T b);
     
     /**
-     * Calculates the distance between two samples.
+     * Gets the mean value of a list. Must be implemented by users of
+     * this class.
      */
-    private double distance(T a, T b)
-    {
-        return distance(a, getValue(b));
-    }
-    
-    /**
-     * Calculates the distance between two samples.
-     */
-    private double distance(T a, double b)
-    {
-        return Math.abs(getValue(a) - b);
-    }
-    
-    /**
-     * 
-     */
-    private double getMean(List<T> list)
-    {
-        double mean = 0;
-        for (T elem : list) {
-            mean += getValue(elem);
-        }
-        return mean / (double)list.size();
-    }
+    public abstract T getMean(List<T> list);
     
     /**
      * Assigns random elements as the centroid values
@@ -128,7 +106,7 @@ public abstract class KMeans<T>
         List<List<T>> clusters = getClusters();
         for (int ki = 0; ki < k; ki++) {
             // Calculate mean inside this cluster
-            double mean = getMean(clusters.get(ki));
+            T mean = getMean(clusters.get(ki));
             
             // Find closest sample
             int closest = 0;
@@ -165,8 +143,16 @@ public abstract class KMeans<T>
         }
         
         KMeans<Integer> km = new KMeans<Integer>(samples, 3) {
-            public double getValue(Integer sample) {
-                return sample;
+            public double distance(Integer a, Integer b) {
+                return Math.abs(a - b);
+            }
+            
+            public Integer getMean(List<Integer> list) {
+                int mean = 0;
+                for (int elem : list) {
+                    mean += elem;
+                }
+                return mean / list.size();
             }
         };
         
