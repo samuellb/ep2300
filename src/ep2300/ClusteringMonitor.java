@@ -2,7 +2,6 @@ package ep2300;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 
 public class ClusteringMonitor
@@ -45,6 +44,17 @@ public class ClusteringMonitor
         this.numTimeSteps = timespan/interval;
     }
     
+    /**
+     * Returns the difference of the last two elements in a list.
+     */
+    private long diffLast(List<Long> list)
+    {
+        int size = list.size();
+        if (size == 0) return 0;
+        else if (size == 1) return list.get(0);
+        else return list.get(size-1) - list.get(size-2);
+    }
+    
     public final void run()
     {
         for (int t = 0; t < numTimeSteps; t++) {
@@ -59,19 +69,18 @@ public class ClusteringMonitor
             
             // Calculate mean values
             for (Router router : routers) {
-                Iterator<Long> it;
-                it = router.octets.iterator();
-                while (it.hasNext()) {
-                    octetSum += it.next();
-                }
-                it = router.packets.iterator();
-                while (it.hasNext()) {
-                    packetSum += it.next();
-                }
+                octetSum += diffLast(router.octets);
+                packetSum += diffLast(router.packets);
             }
             
             int numRouters = routers.size();
-            means.add(new TimeStep(t, octetSum/numRouters, packetSum/numRouters));
+            long octetMean = octetSum/numRouters;
+            long packetMean = packetSum/numRouters;
+            
+            if (t > 0) {
+                System.out.println(t+": "+octetMean+" "+packetMean);
+                means.add(new TimeStep(t, octetMean, packetMean));
+            }
             
             long workDuration = System.currentTimeMillis() - startTime;
             
