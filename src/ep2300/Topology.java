@@ -82,7 +82,8 @@ public class Topology implements SnmpClient
      */
     private void probe(String ip, SnmpOID... startingOID)
     {
-        outstandingRequests.addAndGet(SNMP.sendOID(ip, this, startingOID));
+        SNMP.sendOID(ip, this, startingOID);
+        outstandingRequests.incrementAndGet();
     }
 
     @Override

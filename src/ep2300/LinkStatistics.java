@@ -41,7 +41,8 @@ public final class LinkStatistics implements SnmpClient
      */
     private void probe(String ip)
     {
-        outstandingRequests.addAndGet(SNMP.sendOID(ip, this, SNMP.outOctetsOID));
+        SNMP.sendOID(ip, this, SNMP.outOctetsOID);
+        outstandingRequests.incrementAndGet();
     }
 
     @Override
