@@ -26,6 +26,12 @@ public class SNMP
      */
     public static final SnmpOID sysDescr = new SnmpOID(".1.3.6.1.2.1.1.1");
 
+    public static final SnmpOID outOctetsOID = new SnmpOID(
+            ".1.3.6.1.2.1.2.2.1.16");
+
+    public static final SnmpOID outPacketsOID = new SnmpOID(
+            ".1.3.6.1.2.1.2.2.1.17");
+
     /**
      * The number of responses in each query.
      */

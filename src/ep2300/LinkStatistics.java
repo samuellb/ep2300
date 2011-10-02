@@ -24,13 +24,7 @@ import com.adventnet.snmp.snmp2.UDPProtocolOptions;
  * Maintains statistics about the sent data on all links in a network.
  */
 public final class LinkStatistics implements SnmpClient
-{
-    private static final SnmpOID outOctetsOID =
-        new SnmpOID(".1.3.6.1.2.1.2.2.1.16");
-    private static final SnmpOID outPacketsOID =
-        new SnmpOID(".1.3.6.1.2.1.2.2.1.17");
-    private static final int numPerResponse = 30;
-    
+{   
     public static final class Router
     {
         public final String hostname, address;
@@ -98,9 +92,9 @@ public final class LinkStatistics implements SnmpClient
             pdu.setNonRepeaters(0);
             //pdu.setMaxRepetitions(1);
             
-            pdu.setMaxRepetitions(numPerResponse); // should be a constant
+            pdu.setMaxRepetitions(SNMP.numPerResponse); // should be a constant
 
-            pdu.addNull(outOctetsOID); // we also need the interface number
+            pdu.addNull(SNMP.outOctetsOID); // we also need the interface number
 //            pdu.addNull(outPacketsOID); -- comes directly after outOctetsOID
             try {
                 outstandingRequests.incrementAndGet();
@@ -143,7 +137,7 @@ public final class LinkStatistics implements SnmpClient
                 probe(address);
                 return true;
             }
-            else if (!ArrayResponse.samePrefix(pdu.getObjectID(0), outOctetsOID)) {
+            else if (!ArrayResponse.samePrefix(pdu.getObjectID(0), SNMP.outOctetsOID)) {
                 System.out.println("Invalid response, probing again: "+pdu.getObjectID(0));
                 try {
                     for (int i = 1; ; i++) {
@@ -162,8 +156,8 @@ public final class LinkStatistics implements SnmpClient
                 long packets = 0;
                 
                 try {
-                    octets = ArrayResponse.sum(pdu, outOctetsOID);
-                    packets = ArrayResponse.sum(pdu, outPacketsOID);
+                    octets = ArrayResponse.sum(pdu, SNMP.outOctetsOID);
+                    packets = ArrayResponse.sum(pdu, SNMP.outPacketsOID);
                 } catch (SnmpException e) {
                     e.printStackTrace();
                 }
