@@ -97,6 +97,32 @@
     </java>
   </target>
   
+  <!-- Test the KMeans class -->
+  <target name="test-kmeans" depends="compile">
+    <java classname="ep2300.KMeans" fork="true">
+      <arg value="1" />
+      <arg value="3" />
+      <arg value="7" />
+      <arg value="8" />
+      <arg value="51" />
+      <arg value="3" />
+      <arg value="47" />
+      <arg value="6" />
+      <arg value="20" />
+      <arg value="18" />
+      <arg value="30" />
+      <arg value="2" />
+      <arg value="4" />
+      <arg value="5" />
+      <arg value="10" />
+      <arg value="22" />
+      <classpath>
+        <path refid="snmp.path" />
+        <pathelement location="${build}"/>
+      </classpath>
+    </java>
+  </target>
+  
   <!-- Runs EP2300.jar -->
   <target name="run">
     <java classname="${mainclass}" fork="true">
