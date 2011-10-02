@@ -148,7 +148,7 @@ public class Topology implements SnmpClient
 
                         if (!respArray.reachedEnd()) {
                             // The list is not complete, request more elements
-                            probe(routerIP, SNMP.sysName, respArray
+                            probe(routerIP, SNMP.ipRouteNextHop, respArray
                                     .getNextStartOID());
                         }
                         else {
