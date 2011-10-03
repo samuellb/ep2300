@@ -41,7 +41,7 @@ public final class LinkStatistics implements SnmpClient
      */
     private void probe(String ip)
     {
-        SNMP.sendOID(ip, this, SNMP.outOctetsOID);
+        SNMP.sendOID(ip, this, SNMP.inOctetsOID);
         outstandingRequests.incrementAndGet();
     }
 
@@ -73,7 +73,7 @@ public final class LinkStatistics implements SnmpClient
 //                probe(address);
                 return true;
             }
-            else if (!SNMP.samePrefix(pdu.getObjectID(0), SNMP.outOctetsOID)) {
+            else if (!SNMP.samePrefix(pdu.getObjectID(0), SNMP.inOctetsOID)) {
                 System.out.println("Invalid response, probing again: "+pdu.getObjectID(0));
                 try {
                     for (int i = 1; ; i++) {
@@ -92,8 +92,8 @@ public final class LinkStatistics implements SnmpClient
                 long packets = 0;
                 
                 try {
-                    octets = ArrayResponse.sum(pdu, SNMP.outOctetsOID);
-                    packets = ArrayResponse.sum(pdu, SNMP.outPacketsOID);
+                    octets = ArrayResponse.sum(pdu, SNMP.inOctetsOID);
+                    packets = ArrayResponse.sum(pdu, SNMP.inPacketsOID);
                 } catch (SnmpException e) {
                     e.printStackTrace();
                 }
