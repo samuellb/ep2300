@@ -4,7 +4,7 @@ filename = "clusterdata.txt"
 #set logscale x
 #set logscale y
 
-set xlabel "In Octets"
+set xlabel "In Packet size"
 set ylabel "In Packets"
 
 set terminal png
