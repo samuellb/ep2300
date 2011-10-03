@@ -119,14 +119,14 @@ public class ClusteringMonitor
             if (t.octets < octetsMin) {
                 octetsMin = t.octets;
             }
-            else if (t.octets > octetsMax) {
+            if (t.octets > octetsMax) {
                 octetsMax = t.octets;
             }
 
             if (t.packets < packetsMin) {
                 packetsMin = t.packets;
             }
-            else if (t.packets > packetsMax) {
+            if (t.packets > packetsMax) {
                 packetsMax = t.packets;
             }
         }
