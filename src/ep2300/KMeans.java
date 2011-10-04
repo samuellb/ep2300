@@ -145,9 +145,13 @@ public abstract class KMeans<T>
 
     /**
      * Update all clusters
+     *
+     * @returns true if one or more clusters were changed.
      */
-    public void updateClusters()
+    public boolean updateClusters()
     {
+        boolean changed = false;
+        
         List<List<T>> clusters = getClusters();
         for (int ki = 0; ki < k; ki++) {
             // Calculate mean inside this cluster
@@ -168,10 +172,16 @@ public abstract class KMeans<T>
                     diff = thisdiff;
                 }
             }
-
-            // Update centroid
-            centroids[ki] = closest;
+            
+            // Is this a new centroid?
+            if (centroids[ki] != closest) {
+                // Update centroid
+                centroids[ki] = closest;
+                changed = true;
+            }
         }
+        
+        return changed;
     }
 
     /**
@@ -182,7 +192,9 @@ public abstract class KMeans<T>
     public void updateClusters(int iterations)
     {
         for (int i = 0; i < iterations; i++) {
-            updateClusters();
+            if (!updateClusters()) {
+                return; // no changes
+            }
         }
     }
 
