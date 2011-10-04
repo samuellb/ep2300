@@ -1,6 +1,5 @@
 package ep2300;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
@@ -15,94 +14,169 @@ import com.adventnet.snmp.snmp2.UDPProtocolOptions;
 import com.adventnet.snmp.snmp2.usm.USMUserEntry;
 import com.adventnet.snmp.snmp2.usm.USMUtils;
 
-public class UDPSnmpV3 {
-    
+/**
+ * Handles the SnmpAPI and the connections to SNMP servers
+ */
+public class UDPSnmpV3
+{
+
+    /**
+     * Container mapping one SnmpSession to one clientID
+     */
     public final static class Result
     {
         private final SnmpSession session;
         private final int clientId;
-        
+
         private Result(SnmpSession session, int clientId)
         {
             this.session = session;
             this.clientId = clientId;
         }
-        
-        public SnmpSession getSession() { return session; }
-        public int getClientId() { return clientId; }
+
+        /**
+         * Get the session contained within this result
+         * 
+         * @return The session
+         */
+        public SnmpSession getSession()
+        {
+            return session;
+        }
+
+        /**
+         * Get the ID of this client
+         * 
+         * @return The client ID
+         */
+        public int getClientId()
+        {
+            return clientId;
+        }
     }
-    
-    
-    private UDPSnmpV3() { } // static class
-    
+
     private static SnmpAPI api = new SnmpAPI();
-    
+
     private static Map<String, SnmpSession> sessions = new HashMap<String, SnmpSession>();
-    
+
     // Perhaps not the best place for them
     private static final String username = "2G1332_student";
     private static final String password = "netmanagement";
-    
+
     // How many times we should try to connect again
     private static final int numRetries = 2;
-    
+
     // Statistics
     private static AtomicInteger successfulConnections = new AtomicInteger();
     private static AtomicInteger attemptedConnections = new AtomicInteger();
-    
-    
-    public static Result createSession(String address,
-            SnmpClient client) throws SnmpException {
+
+    /**
+     * Wrapper around createSession(String, SnmpClient, String, String) with the
+     * default username and password registering the client for callbacks.
+     * 
+     * @see #createSession(String, SnmpClient, String, String)
+     * 
+     * @param address The address to connect to
+     * @param client The client to register
+     * @return The resulting Result object
+     * @throws SnmpException If trying to open the same connection several
+     *             times, should not happen.
+     */
+    public static Result createSession(String address, SnmpClient client)
+            throws SnmpException
+    {
         return createSession(address, client, username, password);
     }
-    
-    public static SnmpSession createSession(String address) throws SnmpException {
+
+    /**
+     * Wrapper around createSession(String, SnmpClient, String, String) with the
+     * default username and password. This method does not register for
+     * callbacks.
+     * 
+     * @see #createSession(String, SnmpClient, String, String)
+     * 
+     * @param address The address to connect to
+     * @return The resulting Result object
+     * @throws SnmpException If trying to open the same connection several
+     *             times, should not happen.
+     */
+    public static SnmpSession createSession(String address)
+            throws SnmpException
+    {
         return createSession(address, username, password);
     }
-    
+
+    /**
+     * Create a new session to the specified address if it has not yet been
+     * established, otherwise return the previously estabilshed connection.
+     * 
+     * @param address The address to connect to
+     * @param client The client to register
+     * @param username The username to authenticate with
+     * @param password The password to authenticate with
+     * @return The resulting Result object
+     * @throws SnmpException If trying to open the same connection several
+     *             times, should not happen.
+     */
+    @SuppressWarnings("unchecked")
     public static Result createSession(String address, SnmpClient client,
-            String username, String password) throws SnmpException {
-        
+            String username, String password) throws SnmpException
+    {
+
         SnmpSession session = createSession(address, username, password);
-        
+
         // Check if the client has been registered already
         int id = -1;
         boolean registered = false;
         Hashtable clients = session.getSnmpClientsWithID();
         for (Object elem : clients.keySet()) {
-            Integer mapId = (Integer)elem;
+            Integer mapId = (Integer) elem;
             if (clients.get(mapId) == client) {
                 id = mapId;
                 registered = true;
                 break;
             }
         }
-        
+
         if (!registered) {
             // register a new session
             id = session.addSnmpClientWithID(client);
         }
-        
+
         return new Result(session, id);
     }
-    
+
     /**
      * Creates an SNMPv3 session with the given username and password for
      * authorization (encryption is not used).
+     * 
+     * @param address The address to connect to
+     * @param username The username to authenticate with
+     * @param password The password to authenticate with
+     * @return A SnmpSession to the address specified
+     * @throws SnmpException If trying to open the same connection several
+     *             times, should not happen.
      */
     public static SnmpSession createSession(String address, String username,
-            String password) throws SnmpException {
-        
+            String password) throws SnmpException
+    {
+
         // Check if a session exists to this address
         synchronized (sessions) {
             if (sessions.containsKey(address)) {
                 // Wait for it to be established
                 while (true) {
                     SnmpSession existing = sessions.get(address);
-                    if (existing != null) return existing;
-                    
-                    try { sessions.wait(); }
-                    catch (InterruptedException e) { }
+                    if (existing != null) {
+                        return existing;
+                    }
+
+                    try {
+                        sessions.wait();
+                    }
+                    catch (InterruptedException e) {
+                        // We ignore the error and try again later.
+                    }
                 }
                 // not reached
             }
@@ -111,26 +185,28 @@ public class UDPSnmpV3 {
                 sessions.put(address, null);
             }
         }
-        
+
         int attempt = 0;
         while (true) {
             try {
                 attemptedConnections.incrementAndGet();
-                SnmpSession session = tryCreateSession(address, username, password);
-                
+                SnmpSession session = tryCreateSession(address, username,
+                        password);
+
                 // Success
                 successfulConnections.incrementAndGet();
-                synchronized(sessions) {
+                synchronized (sessions) {
                     sessions.put(address, session);
                     sessions.notifyAll();
                 }
                 return session;
-                
-            } catch (SnmpException e) {
+
+            }
+            catch (SnmpException e) {
                 // Error. Abort if the retry limit is reached
                 if (attempt++ > numRetries) {
-                    System.out.println("gave up with: "+address);
-                    synchronized(sessions) {
+                    System.out.println("gave up with: " + address);
+                    synchronized (sessions) {
                         sessions.remove(address);
                         sessions.notifyAll();
                     }
@@ -139,51 +215,68 @@ public class UDPSnmpV3 {
             }
         }
     }
-    
+
     /**
      * Tries once to create an SNMPv3 session.
      */
-    private static SnmpSession tryCreateSession(String address, String username,
-            String password) throws SnmpException {
-        
+    private static SnmpSession tryCreateSession(String address,
+            String username, String password) throws SnmpException
+    {
+
         ProtocolOptions protocolOptions = new UDPProtocolOptions(address);
-        
+
         SnmpSession session = new SnmpSession(api);
         session.setVersion(SnmpAPI.SNMP_VERSION_3);
         session.setProtocolOptions(protocolOptions);
         session.setUserName(username.getBytes());
         session.setTimeout(750);
         session.open();
-        
+
         boolean success = false;
         try {
             USMUtils.init_v3_parameters(username, null, USMUserEntry.MD5_AUTH,
-                password, null, protocolOptions, session, true);
-            
+                    password, null, protocolOptions, session, true);
+
             success = true;
-        } finally {
-            if (!success) session.close();
         }
-        
+        finally {
+            if (!success) {
+                session.close();
+            }
+        }
+
         return session;
     }
-    
-    public static void close() {
+
+    /**
+     * Close all sessions and the API.
+     */
+    public static void close()
+    {
         for (SnmpSession session : sessions.values()) {
             session.close();
         }
         sessions.clear();
-        // TODO Go through the sessions and close them (perhaps unnescesary?)
         api.close();
     }
-    
-    public static int getAttemptedConnections() {
+
+    /**
+     * Get the number of connection attempts
+     * 
+     * @return The number of connection attempts.
+     */
+    public static int getAttemptedConnections()
+    {
         return attemptedConnections.get();
     }
-    
-    public static int getSuccessfulConnections() {
+
+    /**
+     * Get the number of successful connections
+     * 
+     * @return The number of successful connections
+     */
+    public static int getSuccessfulConnections()
+    {
         return successfulConnections.get();
     }
 }
-
-

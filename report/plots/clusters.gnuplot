@@ -17,5 +17,5 @@ set output "clusters.png"
 
 plot filename index 0 using 1:2 with points ps 2 notitle, \
      filename index 1 using 1:2 with points ps 2 notitle, \
-     filename index 2 using 1:2 with points ps 2 notitle, \
-     filename index 3 using 1:2 with points ps 2 notitle
+     filename index 2 using 1:2 with points ps 2 notitle #, \
+#     filename index 3 using 1:2 with points ps 2 notitle

@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+/**
+ * Monitor what clusters exists in the statistical data inside the network.
+ */
 public class ClusteringMonitor
 {
 
@@ -29,17 +32,23 @@ public class ClusteringMonitor
 
     private final LinkStatistics stats;
     private final int interval;
-    private final int timespan;
     private final int numClusters;
     private final int numTimeSteps;
     private List<TimeStep> means = new ArrayList<TimeStep>();
 
+    /**
+     * Create a new ClusteringMonitor.
+     * 
+     * @param stats The statistics over the network
+     * @param interval The interval between statistics gathering
+     * @param timespan The total time to perform monitoring over
+     * @param numClusters The number of clusters in the clustering.
+     */
     public ClusteringMonitor(LinkStatistics stats, int interval, int timespan,
             int numClusters)
     {
         this.stats = stats;
         this.interval = interval;
-        this.timespan = timespan;
         this.numClusters = numClusters;
         numTimeSteps = timespan / interval;
     }
@@ -61,6 +70,16 @@ public class ClusteringMonitor
         }
     }
 
+    /**
+     * Run the algorithm
+     * 
+     * There is three steps to this:
+     * 1. Update the statistics
+     * 2. Calculate means
+     * 3. Calculate K-Means over data
+     * 
+     * Step one and two are looped until enough time has passed.
+     */
     public final void run()
     {
         for (int t = 0; t < numTimeSteps; t++) {
@@ -101,6 +120,7 @@ public class ClusteringMonitor
                     Thread.sleep(delay);
                 }
                 catch (InterruptedException e) {
+                    // If we are interrupted, just continue
                 }
             }
         }
@@ -190,6 +210,12 @@ public class ClusteringMonitor
         }
     }
 
+    /**
+     * Gather statistics over the network and calculate the clusters.
+     * 
+     * @param args CLI, Should contain, in order, the address to the first
+     *            router, the interval, the timespan and the number of clusters.
+     */
     public static void main(String[] args)
     {
         if (args.length != 4) {

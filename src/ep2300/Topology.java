@@ -12,7 +12,6 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.adventnet.snmp.snmp2.SnmpClient;
-import com.adventnet.snmp.snmp2.SnmpException;
 import com.adventnet.snmp.snmp2.SnmpIpAddress;
 import com.adventnet.snmp.snmp2.SnmpOID;
 import com.adventnet.snmp.snmp2.SnmpPDU;
@@ -33,7 +32,7 @@ public class Topology implements SnmpClient
      * A mapping between router names and routers, preferably unique
      */
     private Map<String, Router> routers = new HashMap<String, Router>();
-    
+
     /**
      * A mapping from an IP to a router, each router can have several IPs.
      */
@@ -112,65 +111,59 @@ public class Topology implements SnmpClient
                 String routerIP = opt.getRemoteAddress().getCanonicalHostName();
 
                 if (SNMP.samePrefix(pdu.getObjectID(0), SNMP.sysName)) {
-                    try {
-                        // Check if this is a new router
-                        Router router;
-                        ArrayResponse<SnmpString> sysArray = new ArrayResponse<SnmpString>(
-                                pdu, SNMP.sysName, SNMP.numPerResponse);
-                        // Make sure we get a sysName in the response
-                        if (sysArray.getElements().size() > 0) {
-                            String routerName = sysArray.getElements().get(0)
-                                    .toString();
-                            router = routers.get(routerName);
-                            if (router == null) {
-                                System.out.println("New router discovered: \t"
-                                        + routerName);
-                                router = new Router(routerName);
-                                router.addIP(routerIP);
-                                routers.put(routerName, router);
-                            }
-                            IPToRouter.put(routerIP, router);
+                    // Check if this is a new router
+                    Router router;
+                    ArrayResponse<SnmpString> sysArray = new ArrayResponse<SnmpString>(
+                            pdu, SNMP.sysName, SNMP.numPerResponse);
+                    // Make sure we get a sysName in the response
+                    if (sysArray.getElements().size() > 0) {
+                        String routerName = sysArray.getElements().get(0)
+                                .toString();
+                        router = routers.get(routerName);
+                        if (router == null) {
+                            System.out.println("New router discovered: \t"
+                                    + routerName);
+                            router = new Router(routerName);
                             router.addIP(routerIP);
+                            routers.put(routerName, router);
                         }
-                        else {
-                            System.err
-                                    .println("We didnt get router sysName at the same "
-                                            + "time as we got the first respons from that router!");
-                            probe(routerIP);
-                            return true;
-                        }
+                        IPToRouter.put(routerIP, router);
+                        router.addIP(routerIP);
+                    }
+                    else {
+                        System.err
+                                .println("We didnt get router sysName at the same "
+                                        + "time as we got the first respons from that router!");
+                        probe(routerIP);
+                        return true;
+                    }
 
-                        // Go through the lists of next hops (=neighbors)
-                        ArrayResponse<SnmpIpAddress> respArray = new ArrayResponse<SnmpIpAddress>(
-                                pdu, SNMP.ipRouteNextHop, SNMP.numPerResponse);
+                    // Go through the lists of next hops (=neighbors)
+                    ArrayResponse<SnmpIpAddress> respArray = new ArrayResponse<SnmpIpAddress>(
+                            pdu, SNMP.ipRouteNextHop, SNMP.numPerResponse);
 
-                        for (SnmpIpAddress addr : respArray) {
-                            String addrStr = addr.toString();
-                            if (addrStr.equals(routerIP)) {
-                                continue;
-                            }
-
-                            router.nextHops.add(addrStr);
-
-                            if (probed.add(addrStr)) {
-                                // Not yet probed
-                                probe(addrStr);
-                            }
+                    for (SnmpIpAddress addr : respArray) {
+                        String addrStr = addr.toString();
+                        if (addrStr.equals(routerIP)) {
+                            continue;
                         }
 
-                        if (!respArray.reachedEnd()) {
-                            // The list is not complete, request more elements
-                            probe(routerIP, SNMP.sysName, respArray
-                                    .getNextStartOID());
-                        }
-                        else {
-                            // We're done
-                            session.removeSnmpClient(this);
+                        router.nextHops.add(addrStr);
+
+                        if (probed.add(addrStr)) {
+                            // Not yet probed
+                            probe(addrStr);
                         }
                     }
-                    catch (SnmpException e) {
-                        // throw new RuntimeException(e);
-                        e.printStackTrace();
+
+                    if (!respArray.reachedEnd()) {
+                        // The list is not complete, request more elements
+                        probe(routerIP, SNMP.sysName, respArray
+                                .getNextStartOID());
+                    }
+                    else {
+                        // We're done
+                        session.removeSnmpClient(this);
                     }
 
                     return true; // done processing PDU
@@ -227,9 +220,10 @@ public class Topology implements SnmpClient
     {
         return routers;
     }
-    
+
     /**
      * Return the Router associated with the specified address
+     * 
      * @param address The IP of the router
      * @return The Router listening to the address
      */
@@ -248,13 +242,17 @@ public class Topology implements SnmpClient
         for (String hostname : routerList) {
             Router router = routers.get(hostname);
             out.printf("%s: ( ", hostname);
-            for (String ip : router.ips)
+            for (String ip : router.ips) {
                 out.printf("%s ", ip);
+            }
             out.printf(")\n");
             for (String nextHop : router.nextHops) {
                 // Print neighbor
-                if (IPToRouter.get(nextHop) == router) continue;
-                out.println("\t" + nextHop + " (" + IPToRouter.get(nextHop) + ")");
+                if (IPToRouter.get(nextHop) == router) {
+                    continue;
+                }
+                out.println("\t" + nextHop + " (" + IPToRouter.get(nextHop)
+                        + ")");
             }
             out.println();
         }

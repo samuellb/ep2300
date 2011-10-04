@@ -26,17 +26,24 @@ public class SNMP
      */
     public static final SnmpOID sysDescr = new SnmpOID(".1.3.6.1.2.1.1.1");
 
+    /**
+     * The total amount of octets inbound
+     */
     public static final SnmpOID inOctetsOID = new SnmpOID(
             ".1.3.6.1.2.1.2.2.1.10");
 
+    /**
+     * The total amount of packets inbound
+     */
     public static final SnmpOID inPacketsOID = new SnmpOID(
             ".1.3.6.1.2.1.2.2.1.11");
 
     /**
      * Error OID
      */
-    public static final SnmpOID usmStatsNotInTimeWindows = new SnmpOID(".1.3.6.1.6.3.15.1.1.2.0");
-    
+    public static final SnmpOID usmStatsNotInTimeWindows = new SnmpOID(
+            ".1.3.6.1.6.3.15.1.1.2.0");
+
     /**
      * The number of responses in each query.
      */
@@ -57,7 +64,8 @@ public class SNMP
         SnmpSession session = null;
         int id = -1;
         try {
-            UDPSnmpV3.Result res = UDPSnmpV3.createSession(ip, client); // Begin here
+            UDPSnmpV3.Result res = UDPSnmpV3.createSession(ip, client); // Begin
+                                                                        // here
             session = res.getSession();
             id = res.getClientId();
         }
@@ -67,7 +75,7 @@ public class SNMP
             // e.printStackTrace();
         }
         if (session != null) { // Should always happen
-            //int id = session.addSnmpClientWithID(client);
+            // int id = session.addSnmpClientWithID(client);
             SnmpPDU pdu = new SnmpPDU();
             pdu.setCommand(SnmpAPI.GETBULK_REQ_MSG);
             pdu.setClientID(id);

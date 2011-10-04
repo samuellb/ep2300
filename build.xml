@@ -7,7 +7,7 @@
   <property name="build" location="build"/>
   <property name="dist"  location="dist"/>
   
-  <property name="mainclass" value="ep2300.Test" />
+  <property name="mainclass" value="ep2300.Topology" />
   
   <!-- classpath for the SNMP library -->
   <path id="snmp.path">
