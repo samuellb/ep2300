@@ -96,6 +96,20 @@
       </classpath>
     </java>
   </target>
+
+  <!-- Runs OnlineAnomalyDetection (task 3) -->
+  <target name="run-onlineanomalydetection" depends="compile">
+    <java classname="ep2300.OnlineAnomalyDetection" fork="true">
+      <arg value="192.168.1.10" />
+      <arg value="1500" />
+      <arg value="20000" />
+      <arg value="3" />
+      <classpath>
+        <path refid="snmp.path" />
+        <pathelement location="${build}"/>
+      </classpath>
+    </java>
+  </target>
   
   <!-- Test the KMeans class -->
   <target name="test-kmeans" depends="compile">
