@@ -25,19 +25,30 @@ public class OnlineAnomalyDetection
     }
 
     /**
-     * Calculate the Davies-Bouldin index
+     * Get the best KMeans clustering by using Davies-Bouldin indexes.
+     * 
+     * @return The best clustering found
      */
-    public void calculateDBI()
+    public KMeans<TimeStep> getBestKM()
     {
         monitor.collectData();
         rawMeans = monitor.getMeans();
         means = monitor.normalize();
+
+        double minDB = Double.MAX_VALUE;
+        KMeans<TimeStep> bestKM = null;
 
         for (int iterations = 1; iterations <= 20; ++iterations) {
             KMeans<TimeStep> km = new RouterKMeans(means, 3);
             km.updateClusters(iterations);
 
             List<List<TimeStep>> clusters = km.getClusters();
+            for (int i = 0; i < clusters.size(); ++i) {
+                if (clusters.get(i).size() == 0) {
+                    clusters.remove(i--);
+                }
+            }
+            
             int n = clusters.size();
             double centroidX[] = new double[n];
             double centroidY[] = new double[n];
@@ -77,8 +88,11 @@ public class OnlineAnomalyDetection
                 DB += max;
             }
             DB /= n;
-            System.out.printf("%s: %f\n", iterations, DB);
+            // System.out.printf("%s: %f\n", iterations, DB);
+            if (DB < minDB)
+                bestKM = km;
         }
+        return bestKM;
     }
 
     private double distance(TimeStep a, double octets, double packets)
@@ -92,14 +106,15 @@ public class OnlineAnomalyDetection
         return Math.sqrt((octets - x2) * (octets - x2) + (y2 - packets)
                 * (y2 - packets));
     }
-    
-    public static void main(String[] argv) {
+
+    public static void main(String[] argv)
+    {
         if (argv.length != 4) {
             System.err
                     .println("usage: java OnlineAnomalyDetection <first router> <interval(ms)> <timespan> <clusters>");
             System.exit(2);
         }
-        
+
         String firstRouter = argv[0];
         int interval = Integer.parseInt(argv[1]);
         int timespan = Integer.parseInt(argv[2]);
@@ -114,9 +129,9 @@ public class OnlineAnomalyDetection
 
         ClusteringMonitor monitor = new ClusteringMonitor(stats, interval,
                 timespan, numClusters);
-        
-        (new OnlineAnomalyDetection(monitor)).calculateDBI();
-        
+
+        monitor.printKMeans((new OnlineAnomalyDetection(monitor)).getBestKM());
+
         UDPSnmpV3.close();
     }
 }
