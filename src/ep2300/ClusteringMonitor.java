@@ -9,27 +9,6 @@ import java.util.List;
  */
 public class ClusteringMonitor
 {
-
-    private static class TimeStep
-    {
-        public final int step;
-        public final double octets;
-        public final double packets;
-
-        public TimeStep(int step, double octets, double packets)
-        {
-            this.step = step;
-            this.octets = octets;
-            this.packets = packets;
-        }
-
-        @Override
-        public String toString()
-        {
-            return step + "(" + (int)octets + "," + (int)packets + ")";
-        }
-    }
-
     private final LinkStatistics stats;
     private final int interval;
     private final int numClusters;
@@ -51,6 +30,16 @@ public class ClusteringMonitor
         this.interval = interval;
         this.numClusters = numClusters;
         numTimeSteps = timespan / interval;
+    }
+
+    /**
+     * Get a list of TimeSteps with data gathered so far
+     * 
+     * @return A list of TimeSteps
+     */
+    public List<TimeStep> getMeans()
+    {
+        return means;
     }
 
     /**
@@ -82,6 +71,18 @@ public class ClusteringMonitor
      */
     public final void run()
     {
+        collectData();
+        // Analyze the results
+        KMeans<TimeStep> km = getKMeans();
+        km.updateClusters(10);
+        printKMeans(km);
+    }
+
+    /**
+     * Collect statistical data and store it in means
+     */
+    public final void collectData()
+    {
         for (int t = 0; t < numTimeSteps; t++) {
 
             long startTime = System.currentTimeMillis();
@@ -108,7 +109,8 @@ public class ClusteringMonitor
             double octetMean = (octetSum / numRouters) / packetMean;
 
             if (t > 0) {
-                System.out.println(t + ": " + (int)octetMean + " " + (int)packetMean);
+                System.out.println(t + ": " + (int) octetMean + " "
+                        + (int) packetMean);
                 means.add(new TimeStep(t, octetMean, packetMean));
             }
 
@@ -125,12 +127,14 @@ public class ClusteringMonitor
             }
         }
 
-        // Analyze the results
-        KMeans<TimeStep> km = calculateKMeans();
-        printKMeans(km);
     }
 
-    private KMeans<TimeStep> calculateKMeans()
+    /**
+     * Normalize the means
+     * 
+     * @return A normalize list of TimeSteps
+     */
+    public List<TimeStep> normalize()
     {
         double octetsMin = Double.MAX_VALUE;
         double packetsMin = Double.MAX_VALUE;
@@ -153,47 +157,32 @@ public class ClusteringMonitor
 
         List<TimeStep> means = new ArrayList<TimeStep>();
         for (TimeStep t : this.means) {
-            means.add(new TimeStep(t.step,
-                      (t.octets - octetsMin) / (octetsMax - octetsMin),
-                      (t.packets - packetsMin) / (packetsMax - packetsMin)));
+            means.add(new TimeStep(t.step, (t.octets - octetsMin)
+                    / (octetsMax - octetsMin), (t.packets - packetsMin)
+                    / (packetsMax - packetsMin)));
         }
+        return means;
+    }
 
+    /**
+     * Calculate the clusters
+     * 
+     * @return The KMeans clustering
+     */
+    public KMeans<TimeStep> getKMeans()
+    {
         // k-means clustering
-        KMeans<TimeStep> km = new KMeans<TimeStep>(means, numClusters) {
-            private double square(double a)
-            {
-                return a * a;
-            }
-
-            @Override
-            public double distance(TimeStep a, TimeStep b)
-            {
-                return Math.sqrt(square(Math.abs(a.octets - b.octets))
-                        + square(Math.abs(a.packets - b.packets)));
-            }
-
-            @Override
-            public TimeStep getMean(List<TimeStep> list)
-            {
-                double size = list.size();
-                double octetMean = 0;
-                double packetMean = 0;
-                for (TimeStep elem : list) {
-                    octetMean += elem.octets;
-                    packetMean += elem.packets;
-                }
-                octetMean /= size;
-                packetMean /= size;
-                return new TimeStep(-1, octetMean, packetMean);
-            }
-        };
-
-        km.updateClusters(10);
+        KMeans<TimeStep> km = new RouterKMeans(normalize(), numClusters);
 
         return km;
     }
 
-    private void printKMeans(KMeans<TimeStep> km)
+    /**
+     * Print the resulting K-Means clusters
+     * 
+     * @param km The KMeans clusters to print
+     */
+    public void printKMeans(KMeans<TimeStep> km)
     {
         // TODO process results (output, or analyze in task 3)
         System.out.println("-----------------------------------------");

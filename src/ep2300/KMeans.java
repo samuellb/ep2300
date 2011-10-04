@@ -38,7 +38,7 @@ public abstract class KMeans<T>
     {
         if (samples.size() < k) {
             throw new IllegalArgumentException(
-                    "Number of clusters is smaller than number of samples.");
+                    "Number of samples is smaller than number of clusters.");
         }
 
         this.samples = samples;
