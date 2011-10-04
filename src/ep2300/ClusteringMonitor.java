@@ -13,10 +13,10 @@ public class ClusteringMonitor
     private static class TimeStep
     {
         public final int step;
-        public final long octets;
-        public final long packets;
+        public final double octets;
+        public final double packets;
 
-        public TimeStep(int step, long octets, long packets)
+        public TimeStep(int step, double octets, double packets)
         {
             this.step = step;
             this.octets = octets;
@@ -26,7 +26,7 @@ public class ClusteringMonitor
         @Override
         public String toString()
         {
-            return step + "(" + octets + "," + packets + ")";
+            return step + "(" + (int)octets + "," + (int)packets + ")";
         }
     }
 
@@ -95,7 +95,7 @@ public class ClusteringMonitor
             Collection<Router> routers = stats.getTopology().getTopology()
                     .values();
 
-            long octetSum = 0, packetSum = 0;
+            double octetSum = 0, packetSum = 0;
 
             // Calculate mean values
             for (Router router : routers) {
@@ -103,12 +103,12 @@ public class ClusteringMonitor
                 packetSum += diffLast(router.packets);
             }
 
-            int numRouters = routers.size();
-            long packetMean = packetSum / numRouters;
-            long octetMean = (octetSum / numRouters) / packetMean;
+            double numRouters = routers.size();
+            double packetMean = packetSum / numRouters;
+            double octetMean = (octetSum / numRouters) / packetMean;
 
             if (t > 0) {
-                System.out.println(t + ": " + octetMean + " " + packetMean);
+                System.out.println(t + ": " + (int)octetMean + " " + (int)packetMean);
                 means.add(new TimeStep(t, octetMean, packetMean));
             }
 
@@ -132,9 +132,9 @@ public class ClusteringMonitor
 
     private KMeans<TimeStep> calculateKMeans()
     {
-        long octetsMin = Long.MAX_VALUE;
-        long packetsMin = Long.MAX_VALUE;
-        long octetsMax = 0, packetsMax = 0;
+        double octetsMin = Double.MAX_VALUE;
+        double packetsMin = Double.MAX_VALUE;
+        double octetsMax = 0, packetsMax = 0;
         for (TimeStep t : means) {
             if (t.octets < octetsMin) {
                 octetsMin = t.octets;
@@ -153,16 +153,14 @@ public class ClusteringMonitor
 
         List<TimeStep> means = new ArrayList<TimeStep>();
         for (TimeStep t : this.means) {
-            means
-                    .add(new TimeStep(
-                            t.step,
-                            (long) (100 * (t.octets - octetsMin) / (double) (octetsMax - octetsMin)),
-                            (long) (100 * (t.packets - packetsMin) / (double) (packetsMax - packetsMin))));
+            means.add(new TimeStep(t.step,
+                      (t.octets - octetsMin) / (octetsMax - octetsMin),
+                      (t.packets - packetsMin) / (packetsMax - packetsMin)));
         }
 
         // k-means clustering
         KMeans<TimeStep> km = new KMeans<TimeStep>(means, numClusters) {
-            private long square(long a)
+            private double square(double a)
             {
                 return a * a;
             }
@@ -177,14 +175,16 @@ public class ClusteringMonitor
             @Override
             public TimeStep getMean(List<TimeStep> list)
             {
-                int size = list.size();
-                long octetMean = 0;
-                long packetMean = 0;
+                double size = list.size();
+                double octetMean = 0;
+                double packetMean = 0;
                 for (TimeStep elem : list) {
                     octetMean += elem.octets;
                     packetMean += elem.packets;
                 }
-                return new TimeStep(-1, octetMean / size, packetMean / size);
+                octetMean /= size;
+                packetMean /= size;
+                return new TimeStep(-1, octetMean, packetMean);
             }
         };
 
