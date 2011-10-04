@@ -8,7 +8,7 @@ import com.adventnet.snmp.snmp2.SnmpPDU;
 import com.adventnet.snmp.snmp2.SnmpSession;
 
 /**
- * A simple class containing constans and generall functions regarding SNMP
+ * A simple class containing constants and general functions regarding SNMP
  */
 public class SNMP
 {
@@ -65,7 +65,7 @@ public class SNMP
         int id = -1;
         try {
             UDPSnmpV3.Result res = UDPSnmpV3.createSession(ip, client); // Begin
-                                                                        // here
+            // here
             session = res.getSession();
             id = res.getClientId();
         }
@@ -90,7 +90,6 @@ public class SNMP
                 session.send(pdu);
             }
             catch (SnmpException e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
         }
@@ -103,8 +102,6 @@ public class SNMP
      * samePrefix("1.2.1", "1.2") == true
      * samePrefix("1.3", "1.2") == false
      * samePrefix("1.2", "1.2") == true
-     * 
-     * TODO Should this be moved somewhere else? its used in Topology.
      */
     static boolean samePrefix(SnmpOID oid, SnmpOID prefix)
     {

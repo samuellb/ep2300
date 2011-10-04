@@ -98,7 +98,7 @@ public class Topology implements SnmpClient
     public boolean callback(SnmpSession session, SnmpPDU pdu, int requestID)
     {
         try {
-            if (pdu.getErrstat() != 0) { // FIXME is this state reachable?
+            if (pdu.getErrstat() != 0) {
                 System.out.println("A request has failed:");
                 System.out.println(pdu.getError());
                 return true; // No further processing is needed since the

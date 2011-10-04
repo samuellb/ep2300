@@ -58,7 +58,7 @@ public final class LinkStatistics implements SnmpClient
                     .getProtocolOptions();
             String address = opt.getRemoteAddress().getCanonicalHostName();
 
-            if (pdu.getErrstat() != 0) { // FIXME is this state reachable?
+            if (pdu.getErrstat() != 0) {
                 System.out.println("A request has failed:");
                 System.out.println(pdu.getError());
                 return true; // No further processing is needed since the
@@ -67,15 +67,13 @@ public final class LinkStatistics implements SnmpClient
             }
             else if (pdu.getObjectID(0).equals(SNMP.usmStatsNotInTimeWindows)) {
                 // Try again
-                // TODO Should the below line be commented?
-                // probe(address);
+                probe(address);
                 return true;
             }
             else if (!SNMP.samePrefix(pdu.getObjectID(0), SNMP.inOctetsOID)) {
                 System.out.println("Invalid response, probing again: "
                         + pdu.getObjectID(0));
-                // TODO Should the below line be commented?
-                // probe(router);
+                probe(address);
 
                 return false;
             }
