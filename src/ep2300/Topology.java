@@ -1,6 +1,7 @@
 package ep2300;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -42,6 +43,13 @@ public class Topology implements SnmpClient
     private AtomicInteger outstandingRequests = new AtomicInteger(0);
 
     /**
+     * Default constructor. Only usede by fromFile()
+     */
+    private Topology()
+    {
+    }
+
+    /**
      * Start the probing
      * 
      * @param firstRouter The router to start probing at
@@ -53,12 +61,38 @@ public class Topology implements SnmpClient
     }
 
     /**
-     * Old constructor used for testing purposes
+     * Loads link statistics from an output file.
      */
-    @Deprecated
-    public Topology()
+    public static Topology fromFile(String filename)
+        throws IOException
     {
-        this("192.168.1.10");
+        Topology topo = new Topology();
+        Router router = null;
+        
+        for (List<String> words : PatternReader.getLines(filename)) {
+            
+            if (words.size() == 0) continue;
+            
+            String w0 = words.get(0);
+            if (w0.matches("^\\w+:$")) {
+                // Start of a new router
+                router = new Router(w0.replace(":", ""));
+                topo.routers.put(router.getSysName(), router);
+                
+                // Add interface IPs
+                for (int i = 2; i < words.size()-1; i++) {
+                    String ip = words.get(i);
+                    router.addIP(ip);
+                    topo.IPToRouter.put(ip, router);
+                }
+            }
+            else if (w0.matches("^[0-9]+[.:][0-9..]+")) {
+                // Neighbor list
+                router.nextHops.add(w0);
+            }
+        }
+        
+        return topo;
     }
 
     /**
@@ -275,23 +309,32 @@ public class Topology implements SnmpClient
      * 
      * @param args CLI args
      */
-    public static void main(String[] args)
+    public static void main(String[] args) throws Exception
     {
-        if (args.length != 1) {
+
+        
+        Topology topo;
+        if (args.length == 2 && args[0].equals("-f")) {
+            // Read from file
+            topo = Topology.fromFile(args[1]);
+        }
+        else if (args.length == 1) {
+            // Explore the network
+            System.out.println("Discovering the topology...");
+            
+            topo = new Topology(args[0]);
+            topo.waitUntilFinished();
+            UDPSnmpV3.close();
+        }
+        else {
             System.err.println("usage: java Topology <first router>");
             System.exit(2);
+            return;
         }
-
-        System.out.println("Discovering the topology...");
-        Topology topo = new Topology();
-
-        topo.waitUntilFinished();
 
         System.out.println("----------------------------------------");
         System.out.println("Discovered topology:\n");
         System.out.print(topo.toString());
-
-        UDPSnmpV3.close();
     }
 
 }
