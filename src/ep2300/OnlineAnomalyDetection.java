@@ -1,5 +1,7 @@
 package ep2300;
 
+import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -110,6 +112,8 @@ public class OnlineAnomalyDetection
         int minSize = 0;
         int maxSize = 0;
         for (int i = 0; i < numClusters; ++i) {
+            List<TimeStep> cluster = km.getClusters().get(i);
+            
             centroidValue[i] = distance(0, 0, km.getCentroid(i).octets, km
                     .getCentroid(i).packets);
             // Find biggest centroid value
@@ -125,7 +129,7 @@ public class OnlineAnomalyDetection
             // Get the size of the clusters depending on the maximum
             // distance
             // from their centroid
-            for (TimeStep t : km.getClusters().get(i)) {
+            for (TimeStep t : cluster) {
                 double curDist = distance(t, km.getCentroid(i));
                 dist = Math.max(curDist, dist);
             }
@@ -141,6 +145,9 @@ public class OnlineAnomalyDetection
             if (size[i] < size[minSize]) {
                 minSize = i;
             }
+            
+            System.out.printf("contiguity of cluster %d: %f\n", i,
+                    getContiguity(cluster));
         }
 
         for (int i = 0; i < size.length; ++i) {
@@ -187,20 +194,39 @@ public class OnlineAnomalyDetection
             List<TimeStep> cluster = km.getClusters().get(minSize);
 
             System.out.println(minSize + " is DDOS cluster ");
-            if (cluster.get(cluster.size() - 1).step - cluster.get(0).step == cluster
-                    .size() - 1) {
-                System.out.println("in Order!");
-            }
         }
+        
         if (minCentVal == maxSize) {
             List<TimeStep> cluster = km.getClusters().get(maxSize);
-            System.out.println(maxSize + " is Portscan cluster ");
-            if (cluster.get(cluster.size() - 1).step - cluster.get(0).step == cluster
-                    .size() - 1) {
-                System.out.println("in Order!");
+            
+            double contiguity = getContiguity(cluster);
+            if (contiguity <= 1.4) {
+                System.out.println(maxSize + " is a contiguous Portscan cluster (contiguity=" + contiguity + ")");
+            }
+            else {
+                System.out.println(maxSize + " is not contiguous, "
+                        + "but otherwise looks like a portscan cluster (contiguity=" + contiguity + ")");
             }
         }
         monitor.printKMeans(km);
+    }
+    
+    /**
+     * Determines how contiguous a cluster is. This is defined as the
+     * average squared time span between samples in the cluster.
+     */
+    public double getContiguity(List<TimeStep> cluster)
+    {
+        List<TimeStep> sorted = new ArrayList<TimeStep>(cluster);
+        Collections.sort(sorted);
+        
+        double distSum = 0;
+        for (int i = 0; i < cluster.size()-1; i++) {
+            int diff = sorted.get(i+1).step - sorted.get(i).step;
+            distSum += diff*diff;
+        }
+        
+        return distSum / (double)(cluster.size()-1);
     }
 
     /**

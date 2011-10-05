@@ -4,7 +4,7 @@ package ep2300;
  * Describes a timestep. A mapping betwen time step and octets
  * and packets.
  */
-public class TimeStep
+public class TimeStep implements Comparable<TimeStep>
 {
     /**
      * The step number
@@ -37,5 +37,11 @@ public class TimeStep
     public String toString()
     {
         return step + "(" + (int) octets + "," + (int) packets + ")";
+    }
+    
+    @Override
+    public int compareTo(TimeStep t)
+    {
+        return step - t.step;
     }
 }
