@@ -233,15 +233,19 @@ public class ClusteringMonitor
      */
     public void printKMeans(KMeans<TimeStep> km)
     {
-        System.out.println("-----------------------------------------");
+        System.out.println("----------------------------------------------------------------------");
+        System.out.println("  Clusters -- the syntax for samples is: timestep(packetsize,packets)");
+        System.out.println();
 
         List<List<TimeStep>> clusters = km.getClusters();
+        int ki = 0;
         for (List<TimeStep> cluster : clusters) {
-            System.out.println("cluster:");
+            System.out.println("cluster:  id=" + (ki++) + "");
             System.out.print("  ");
             for (TimeStep sample : cluster) {
                 System.out.print("  " + means.get(sample.step - 1));
             }
+            System.out.println();
             System.out.println();
         }
     }
