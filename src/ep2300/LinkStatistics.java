@@ -127,7 +127,7 @@ public final class LinkStatistics implements SnmpClient
             try {
                 long delay = System.currentTimeMillis() - start;
 
-                if (delay > timeout) {
+                if (delay >= timeout) {
                     break;
                 }
 
