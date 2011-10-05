@@ -21,12 +21,12 @@ public abstract class KMeans<T>
     /**
      * Number of clusters to create.
      */
-    private final int k;
+    private int k;
 
     /**
      * Centroid values of each cluster.
      */
-    private final int[] centroids;
+    private int[] centroids;
 
     /**
      * Create a new KMeans based on the provided samples, given k clusters.
@@ -196,6 +196,32 @@ public abstract class KMeans<T>
                 return; // no changes
             }
         }
+    }
+    
+    /**
+     * Removes all empty clusters
+     */
+    public void removeEmptyClusters()
+    {
+        int newk = 0;
+        List<List<T>> clusters = getClusters();
+        
+        // Count non-empty clusters
+        for (int ki = 0; ki < k; ki++) {
+            if (clusters.get(ki).size() != 0) newk++;
+        }
+        
+        // Create a new list with only non-empty clusters
+        int[] newCentroids = new int[newk];
+        int newki = 0;
+        for (int ki = 0; ki < k; ki++) {
+            if (clusters.get(ki).size() != 0) {
+                newCentroids[newki++] = centroids[ki];
+            }
+        }
+        
+        centroids = newCentroids;
+        k = newk;
     }
 
     /**
