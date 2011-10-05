@@ -1,0 +1,98 @@
+Buildfile: build.xml
+
+init:
+
+compile:
+
+run-onlineanomalydetection:
+     [java] Discovering the topology...
+     [java] New router discovered: 	R9
+     [java] New router discovered: 	R13
+     [java] New router discovered: 	R14
+     [java] New router discovered: 	R0
+     [java] New router discovered: 	R2
+     [java] New router discovered: 	R1
+     [java] New router discovered: 	R3
+     [java] New router discovered: 	R8
+     [java] New router discovered: 	R10
+     [java] New router discovered: 	R11
+     [java] New router discovered: 	R7
+     [java] Invalid response, probing again: .1.3.6.1.6.3.15.1.1.2.0
+     [java] Invalid response, probing again: .1.3.6.1.6.3.15.1.1.2.0
+     [java] New router discovered: 	R12
+     [java] Invalid response, probing again: .1.3.6.1.6.3.15.1.1.2.0
+     [java] Invalid response, probing again: .1.3.6.1.6.3.15.1.1.2.0
+     [java] Invalid response, probing again: .1.3.6.1.6.3.15.1.1.2.0
+     [java] Invalid response, probing again: .1.3.6.1.6.3.15.1.1.2.0
+     [java] Invalid response, probing again: .1.3.6.1.6.3.15.1.1.2.0
+     [java] Invalid response, probing again: .1.3.6.1.6.3.15.1.1.2.0
+     [java] Invalid response, probing again: .1.3.6.1.6.3.15.1.1.2.0
+     [java] Invalid response, probing again: .1.3.6.1.6.3.15.1.1.2.0
+     [java] Invalid response, probing again: .1.3.6.1.6.3.15.1.1.2.0
+     [java] Invalid response, probing again: .1.3.6.1.6.3.15.1.1.2.0
+     [java] New router discovered: 	R4
+     [java] New router discovered: 	R15
+     [java] New router discovered: 	R5
+     [java] New router discovered: 	R6
+     [java] Discovery finished.
+
+
+     [java] unfinished requests: 2
+     [java] 1: 142 327
+     [java] unfinished requests: 3
+     [java] 2: 150 227
+     [java] unfinished requests: 4
+     [java] 3: 162 191
+     [java] unfinished requests: 5
+     [java] 4: 194 150
+     [java] unfinished requests: 6
+     [java] 5: 192 125
+     [java] unfinished requests: 7
+     [java] 6: 188 209
+     [java] unfinished requests: 8
+     [java] 7: 189 147
+     [java] unfinished requests: 9
+     [java] 8: 184 105
+     [java] unfinished requests: 10
+     [java] 9: 174 141
+     [java] unfinished requests: 10
+     [java] 10: 2 147492976
+     [java] unfinished requests: 10
+     [java] 11: 179 386
+     [java] unfinished requests: 10
+     [java] 12: 201 383
+     [java] unfinished requests: 11
+     [java] 13: 219 397
+     [java] unfinished requests: 12
+     [java] 14: 214 214
+     [java] unfinished requests: 13
+     [java] 15: 266 106
+     [java] unfinished requests: 14
+     [java] 16: 289 86
+     [java] unfinished requests: 15
+     [java] 17: 270 110
+     [java] unfinished requests: 16
+     [java] 18: 258 88
+     [java] unfinished requests: 17
+     [java] 19: 324 89
+     [java] unfinished requests: 18
+     [java] 20: 337 140
+     [java] unfinished requests: 19
+     [java] 21: 329 80
+     [java] unfinished requests: 20
+     [java] 22: 336 96
+     [java] unfinished requests: 21
+     [java] 23: 300 108
+     [java] unfinished requests: 22
+     [java] 24: 282 81
+     [java] -----------------------------------------
+     [java] cluster:
+     [java]     15(266,106)  16(289,86)  17(270,110)  18(258,88)  19(324,89)  20(337,140)  21(329,80)  22(336,96)  23(300,108)  24(282,81)
+     [java] cluster:
+     [java]     1(142,327)  2(150,227)  3(162,191)  4(194,150)  5(192,125)  6(188,209)  7(189,147)  8(184,105)  9(174,141)  11(179,386)  12(201,383)  13(219,397)  14(214,214)
+     [java] cluster:
+     [java]     10(2,147492976)
+
+BUILD SUCCESSFUL
+Total time: 1 minute 12 seconds
+

@@ -1,0 +1,444 @@
+Buildfile: build.xml
+
+init:
+
+compile:
+    [javac] Compiling 9 source files to /home/samuel/ep2300-samuel/build
+
+run-clusteringmonitor:
+     [java] Discovering the topology...
+     [java] New router discovered: 	R9
+     [java] New router discovered: 	R13
+     [java] New router discovered: 	R14
+     [java] New router discovered: 	R0
+     [java] New router discovered: 	R2
+     [java] New router discovered: 	R1
+     [java] New router discovered: 	R3
+     [java] New router discovered: 	R8
+     [java] New router discovered: 	R10
+     [java] New router discovered: 	R11
+     [java] New router discovered: 	R7
+     [java] New router discovered: 	R12
+     [java] New router discovered: 	R4
+     [java] New router discovered: 	R15
+     [java] New router discovered: 	R5
+     [java] New router discovered: 	R6
+     [java] Invalid response, probing again: .1.3.6.1.6.3.15.1.1.2.0
+     [java] Invalid response, probing again: .1.3.6.1.6.3.15.1.1.2.0
+     [java] Discovery finished.
+
+
+     [java] Monitoring...
+     [java] unfinished requests: 1
+     [java] unfinished requests: 3
+     [java] 1: 5 76526281
+     [java] unfinished requests: 5
+     [java] 2: 278 122
+     [java] unfinished requests: 6
+     [java] 3: 275 104
+     [java] unfinished requests: 7
+     [java] 4: 253 155
+     [java] unfinished requests: 9
+     [java] 5: 273 196
+     [java] unfinished requests: 10
+     [java] 6: 235 273
+     [java] unfinished requests: 11
+     [java] 7: 311 88
+     [java] unfinished requests: 12
+     [java] 8: 315 72
+     [java] unfinished requests: 13
+     [java] 9: 286 109
+     [java] unfinished requests: 14
+     [java] 10: 322 125
+     [java] unfinished requests: 15
+     [java] 11: 229 308
+     [java] unfinished requests: 16
+     [java] 12: 215 205
+     [java] unfinished requests: 18
+     [java] 13: 283 91
+     [java] unfinished requests: 19
+     [java] 14: 311 121
+     [java] unfinished requests: 21
+     [java] 15: 218 379
+     [java] unfinished requests: 22
+     [java] 16: 242 135
+     [java] unfinished requests: 23
+     [java] 17: 271 185
+     [java] unfinished requests: 24
+     [java] 18: 320 106
+     [java] unfinished requests: 25
+     [java] 19: 297 87
+     [java] unfinished requests: 26
+     [java] 20: 300 68
+     [java] unfinished requests: 27
+     [java] 21: 295 147
+     [java] unfinished requests: 28
+     [java] 22: 274 420
+     [java] unfinished requests: 31
+     [java] 23: 232 257
+     [java] unfinished requests: 33
+     [java] 24: 241 193
+     [java] unfinished requests: 34
+     [java] 25: 237 199
+     [java] unfinished requests: 35
+     [java] 26: 239 126
+     [java] unfinished requests: 36
+     [java] 27: 294 75
+     [java] unfinished requests: 37
+     [java] 28: 283 121
+     [java] unfinished requests: 38
+     [java] 29: 204 239
+     [java] unfinished requests: 39
+     [java] 30: 332 89
+     [java] unfinished requests: 40
+     [java] 31: 270 102
+     [java] unfinished requests: 41
+     [java] 32: 251 116
+     [java] unfinished requests: 42
+     [java] 33: 301 152
+     [java] unfinished requests: 43
+     [java] 34: 287 121
+     [java] unfinished requests: 44
+     [java] 35: 395 29
+     [java] unfinished requests: 45
+     [java] 36: 393 76
+     [java] unfinished requests: 46
+     [java] 37: 346 218
+     [java] unfinished requests: 47
+     [java] 38: 293 131
+     [java] unfinished requests: 48
+     [java] 39: 329 82
+     [java] unfinished requests: 49
+     [java] 40: 280 106
+     [java] unfinished requests: 50
+     [java] 41: 252 151
+     [java] unfinished requests: 52
+     [java] 42: 326 101
+     [java] unfinished requests: 53
+     [java] 43: 262 218
+     [java] unfinished requests: 55
+     [java] 44: 285 82
+     [java] unfinished requests: 56
+     [java] 45: 315 74
+     [java] unfinished requests: 57
+     [java] 46: 224 189
+     [java] unfinished requests: 59
+     [java] 47: 177 306
+     [java] unfinished requests: 60
+     [java] 48: 176 163
+     [java] unfinished requests: 61
+     [java] 49: 306 101
+     [java] unfinished requests: 62
+     [java] 50: 284 110
+     [java] unfinished requests: 63
+     [java] 51: 253 181
+     [java] unfinished requests: 64
+     [java] 52: 299 73
+     [java] unfinished requests: 66
+     [java] 53: 294 82
+     [java] unfinished requests: 68
+     [java] 54: 277 137
+     [java] unfinished requests: 69
+     [java] 55: 339 90
+     [java] unfinished requests: 70
+     [java] 56: 286 90
+     [java] unfinished requests: 71
+     [java] 57: 203 151
+     [java] unfinished requests: 72
+     [java] 58: 223 100
+     [java] unfinished requests: 73
+     [java] 59: 334 54
+     [java] unfinished requests: 74
+     [java] 60: 234 132
+     [java] unfinished requests: 75
+     [java] 61: 237 123
+     [java] unfinished requests: 76
+     [java] 62: 247 199
+     [java] unfinished requests: 77
+     [java] 63: 201 217
+     [java] unfinished requests: 78
+     [java] 64: 213 137
+     [java] unfinished requests: 79
+     [java] 65: 343 66
+     [java] unfinished requests: 80
+     [java] 66: 221 235
+     [java] unfinished requests: 82
+     [java] 67: 187 332
+     [java] unfinished requests: 83
+     [java] 68: 266 93
+     [java] unfinished requests: 84
+     [java] 69: 291 119
+     [java] unfinished requests: 85
+     [java] 70: 237 198
+     [java] unfinished requests: 86
+     [java] 71: 230 149
+     [java] unfinished requests: 87
+     [java] 72: 260 147
+     [java] unfinished requests: 88
+     [java] 73: 262 119
+     [java] unfinished requests: 88
+     [java] 74: 2 147214623
+     [java] unfinished requests: 88
+     [java] 75: 202 632
+     [java] unfinished requests: 88
+     [java] 76: 187 810
+     [java] unfinished requests: 88
+     [java] 77: 242 473
+     [java] unfinished requests: 88
+     [java] 78: 207 478
+     [java] unfinished requests: 88
+     [java] 79: 224 599
+     [java] unfinished requests: 89
+     [java] 80: 234 453
+     [java] unfinished requests: 90
+     [java] 81: 204 691
+     [java] unfinished requests: 90
+     [java] 82: 237 448
+     [java] unfinished requests: 91
+     [java] 83: 228 586
+     [java] unfinished requests: 92
+     [java] 84: 236 295
+     [java] unfinished requests: 93
+     [java] 85: 248 265
+     [java] unfinished requests: 93
+     [java] 86: 244 314
+     [java] unfinished requests: 94
+     [java] 87: 209 618
+     [java] unfinished requests: 95
+     [java] 88: 246 236
+     [java] unfinished requests: 96
+     [java] 89: 249 208
+     [java] unfinished requests: 97
+     [java] 90: 236 409
+     [java] unfinished requests: 98
+     [java] 91: 257 305
+     [java] unfinished requests: 99
+     [java] 92: 285 164
+     [java] unfinished requests: 101
+     [java] 93: 263 198
+     [java] unfinished requests: 102
+     [java] 94: 269 221
+     [java] unfinished requests: 103
+     [java] 95: 302 337
+     [java] unfinished requests: 104
+     [java] 96: 264 226
+     [java] unfinished requests: 105
+     [java] 97: 249 182
+     [java] unfinished requests: 106
+     [java] 98: 249 194
+     [java] unfinished requests: 107
+     [java] 99: 272 169
+     [java] unfinished requests: 107
+     [java] 100: 239 349
+     [java] unfinished requests: 108
+     [java] 101: 253 402
+     [java] unfinished requests: 109
+     [java] 102: 249 526
+     [java] unfinished requests: 110
+     [java] 103: 246 511
+     [java] unfinished requests: 111
+     [java] 104: 227 417
+     [java] unfinished requests: 112
+     [java] 105: 231 322
+     [java] unfinished requests: 113
+     [java] 106: 235 370
+     [java] unfinished requests: 113
+     [java] 107: 254 393
+     [java] unfinished requests: 114
+     [java] 108: 246 354
+     [java] unfinished requests: 115
+     [java] 109: 239 233
+     [java] unfinished requests: 116
+     [java] 110: 230 258
+     [java] unfinished requests: 117
+     [java] 111: 240 308
+     [java] unfinished requests: 118
+     [java] 112: 258 245
+     [java] unfinished requests: 119
+     [java] 113: 268 190
+     [java] unfinished requests: 120
+     [java] 114: 253 414
+     [java] unfinished requests: 121
+     [java] 115: 259 437
+     [java] unfinished requests: 122
+     [java] 116: 256 209
+     [java] unfinished requests: 123
+     [java] 117: 270 154
+     [java] unfinished requests: 124
+     [java] 118: 272 243
+     [java] unfinished requests: 126
+     [java] 119: 261 287
+     [java] unfinished requests: 127
+     [java] 120: 272 233
+     [java] unfinished requests: 128
+     [java] 121: 268 213
+     [java] unfinished requests: 129
+     [java] 122: 272 240
+     [java] unfinished requests: 130
+     [java] 123: 269 249
+     [java] unfinished requests: 131
+     [java] 124: 270 186
+     [java] unfinished requests: 132
+     [java] 125: 271 211
+     [java] unfinished requests: 133
+     [java] 126: 253 302
+     [java] unfinished requests: 135
+     [java] 127: 260 317
+     [java] unfinished requests: 136
+     [java] 128: 267 235
+     [java] unfinished requests: 137
+     [java] 129: 245 201
+     [java] unfinished requests: 138
+     [java] 130: 244 185
+     [java] unfinished requests: 139
+     [java] 131: 289 179
+     [java] unfinished requests: 141
+     [java] 132: 275 257
+     [java] unfinished requests: 142
+     [java] 133: 273 202
+     [java] unfinished requests: 143
+     [java] 134: 262 215
+     [java] unfinished requests: 144
+     [java] 135: 257 217
+     [java] unfinished requests: 145
+     [java] 136: 253 192
+     [java] unfinished requests: 146
+     [java] 137: 269 203
+     [java] unfinished requests: 147
+     [java] 138: 277 315
+     [java] unfinished requests: 148
+     [java] 139: 273 315
+     [java] unfinished requests: 149
+     [java] 140: 252 521
+     [java] unfinished requests: 151
+     [java] 141: 219 353
+     [java] unfinished requests: 152
+     [java] 142: 246 340
+     [java] unfinished requests: 153
+     [java] 143: 266 293
+     [java] unfinished requests: 155
+     [java] 144: 248 557
+     [java] unfinished requests: 157
+     [java] 145: 222 523
+     [java] unfinished requests: 158
+     [java] 146: 262 168
+     [java] unfinished requests: 159
+     [java] 147: 267 188
+     [java] unfinished requests: 160
+     [java] 148: 229 304
+     [java] unfinished requests: 161
+     [java] 149: 279 232
+     [java] unfinished requests: 162
+     [java] 150: 241 239
+     [java] unfinished requests: 163
+     [java] 151: 237 309
+     [java] unfinished requests: 164
+     [java] 152: 261 453
+     [java] unfinished requests: 165
+     [java] 153: 263 302
+     [java] unfinished requests: 166
+     [java] 154: 231 259
+     [java] unfinished requests: 167
+     [java] 155: 251 218
+     [java] unfinished requests: 169
+     [java] 156: 267 181
+     [java] unfinished requests: 170
+     [java] 157: 254 206
+     [java] unfinished requests: 171
+     [java] 158: 244 213
+     [java] unfinished requests: 172
+     [java] 159: 283 267
+     [java] unfinished requests: 174
+     [java] 160: 273 302
+     [java] unfinished requests: 175
+     [java] 161: 288 210
+     [java] unfinished requests: 176
+     [java] 162: 308 205
+     [java] unfinished requests: 177
+     [java] 163: 244 153
+     [java] unfinished requests: 178
+     [java] 164: 315 155
+     [java] unfinished requests: 179
+     [java] 165: 272 280
+     [java] unfinished requests: 180
+     [java] 166: 257 396
+     [java] unfinished requests: 181
+     [java] 167: 237 267
+     [java] unfinished requests: 183
+     [java] 168: 210 261
+     [java] unfinished requests: 184
+     [java] 169: 227 227
+     [java] unfinished requests: 185
+     [java] 170: 254 224
+     [java] unfinished requests: 186
+     [java] 171: 283 218
+     [java] unfinished requests: 187
+     [java] 172: 270 275
+     [java] unfinished requests: 188
+     [java] 173: 267 316
+     [java] unfinished requests: 189
+     [java] 174: 246 293
+     [java] unfinished requests: 190
+     [java] 175: 246 229
+     [java] unfinished requests: 191
+     [java] 176: 263 383
+     [java] unfinished requests: 192
+     [java] 177: 256 179
+     [java] unfinished requests: 194
+     [java] 178: 269 195
+     [java] unfinished requests: 195
+     [java] 179: 290 195
+     [java] unfinished requests: 196
+     [java] 180: 288 203
+     [java] unfinished requests: 197
+     [java] 181: 278 223
+     [java] unfinished requests: 198
+     [java] 182: 275 247
+     [java] unfinished requests: 199
+     [java] 183: 275 170
+     [java] unfinished requests: 200
+     [java] 184: 298 171
+     [java] unfinished requests: 202
+     [java] 185: 282 230
+     [java] unfinished requests: 203
+     [java] 186: 284 308
+     [java] unfinished requests: 205
+     [java] 187: 267 264
+     [java] unfinished requests: 206
+     [java] 188: 263 207
+     [java] unfinished requests: 207
+     [java] 189: 252 220
+     [java] unfinished requests: 208
+     [java] 190: 262 238
+     [java] unfinished requests: 209
+     [java] 191: 281 204
+     [java] unfinished requests: 210
+     [java] 192: 280 174
+     [java] unfinished requests: 211
+     [java] 193: 284 268
+     [java] unfinished requests: 212
+     [java] 194: 278 254
+     [java] unfinished requests: 213
+     [java] 195: 265 204
+     [java] unfinished requests: 214
+     [java] 196: 244 208
+     [java] unfinished requests: 215
+     [java] 197: 294 195
+     [java] unfinished requests: 216
+     [java] 198: 269 236
+     [java] unfinished requests: 217
+     [java] 199: 246 216
+     [java] cluster:
+     [java]     7(311,88)  8(315,72)  9(286,109)  10(322,125)  14(311,121)  18(320,106)  19(297,87)  20(300,68)  21(295,147)  27(294,75)  30(332,89)  33(301,152)  34(287,121)  35(395,29)  36(393,76)  37(346,218)  38(293,131)  39(329,82)  42(326,101)  44(285,82)  45(315,74)  49(306,101)  52(299,73)  53(294,82)  55(339,90)  56(286,90)  59(334,54)  65(343,66)  69(291,119)  92(285,164)  95(302,337)  131(289,179)  161(288,210)  162(308,205)  164(315,155)  179(290,195)  180(288,203)  184(298,171)  197(294,195)
+     [java] cluster:
+     [java]     6(235,273)  11(229,308)  16(242,135)  23(232,257)  24(241,193)  25(237,199)  26(239,126)  46(224,189)  58(223,100)  60(234,132)  61(237,123)  62(247,199)  66(221,235)  70(237,198)  71(230,149)  77(242,473)  79(224,599)  80(234,453)  82(237,448)  83(228,586)  84(236,295)  85(248,265)  86(244,314)  88(246,236)  89(249,208)  90(236,409)  97(249,182)  98(249,194)  100(239,349)  102(249,526)  103(246,511)  104(227,417)  105(231,322)  106(235,370)  108(246,354)  109(239,233)  110(230,258)  111(240,308)  129(245,201)  130(244,185)  141(219,353)  142(246,340)  144(248,557)  145(222,523)  148(229,304)  150(241,239)  151(237,309)  154(231,259)  158(244,213)  163(244,153)  167(237,267)  169(227,227)  174(246,293)  175(246,229)  196(244,208)  199(246,216)
+     [java] cluster:
+     [java]     12(215,205)  15(218,379)  29(204,239)  57(203,151)  63(201,217)  64(213,137)  75(202,632)  78(207,478)  81(204,691)  87(209,618)  168(210,261)
+     [java] cluster:
+     [java]     1(5,76526281)  47(177,306)  48(176,163)  67(187,332)  74(2,147214623)  76(187,810)
+     [java] cluster:
+     [java]     2(278,122)  3(275,104)  4(253,155)  5(273,196)  13(283,91)  17(271,185)  22(274,420)  28(283,121)  31(270,102)  32(251,116)  40(280,106)  41(252,151)  43(262,218)  50(284,110)  51(253,181)  54(277,137)  68(266,93)  72(260,147)  73(262,119)  91(257,305)  93(263,198)  94(269,221)  96(264,226)  99(272,169)  101(253,402)  107(254,393)  112(258,245)  113(268,190)  114(253,414)  115(259,437)  116(256,209)  117(270,154)  118(272,243)  119(261,287)  120(272,233)  121(268,213)  122(272,240)  123(269,249)  124(270,186)  125(271,211)  126(253,302)  127(260,317)  128(267,235)  132(275,257)  133(273,202)  134(262,215)  135(257,217)  136(253,192)  137(269,203)  138(277,315)  139(273,315)  140(252,521)  143(266,293)  146(262,168)  147(267,188)  149(279,232)  152(261,453)  153(263,302)  155(251,218)  156(267,181)  157(254,206)  159(283,267)  160(273,302)  165(272,280)  166(257,396)  170(254,224)  171(283,218)  172(270,275)  173(267,316)  176(263,383)  177(256,179)  178(269,195)  181(278,223)  182(275,247)  183(275,170)  185(282,230)  186(284,308)  187(267,264)  188(263,207)  189(252,220)  190(262,238)  191(281,204)  192(280,174)  193(284,268)  194(278,254)  195(265,204)  198(269,236)
+
+BUILD SUCCESSFUL
+Total time: 9 minutes 16 seconds
+

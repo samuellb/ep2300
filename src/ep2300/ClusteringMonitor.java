@@ -1,5 +1,6 @@
 package ep2300;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -31,6 +32,30 @@ public class ClusteringMonitor
         this.interval = interval;
         this.numClusters = numClusters;
         this.numTimeSteps = numTimeSteps;
+    }
+    
+    /**
+     * Loads data from a monitor output file.
+     */
+    public void loadFromFile(String filename) throws IOException
+    {
+        int timestep = 1;
+        for (List<String> words : PatternReader.getLines(filename)) {
+
+            if (words.size() != 3) continue;
+            
+            String w0 = words.get(0);
+            if (!w0.matches("[0-9]+:")) continue;
+            //long timestep = Integer.parseInt(w0.replace(":", ""));
+            
+            // Average packet size
+            long packetSize = Long.parseLong(words.get(1));
+            
+            // Average number of packets
+            long packets = Long.parseLong(words.get(2));
+            
+            means.add(new TimeStep(timestep++, packetSize, packets));
+        }
     }
 
     /**
