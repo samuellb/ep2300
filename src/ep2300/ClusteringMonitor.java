@@ -33,27 +33,34 @@ public class ClusteringMonitor
         this.numClusters = numClusters;
         this.numTimeSteps = numTimeSteps;
     }
-    
+
     /**
      * Loads data from a monitor output file.
+     * 
+     * @param filename The filename to load offline data from
+     * @throws IOException If the file cannot be read
      */
     public void loadFromFile(String filename) throws IOException
     {
         int timestep = 1;
         for (List<String> words : PatternReader.getLines(filename)) {
 
-            if (words.size() != 3) continue;
-            
+            if (words.size() != 3) {
+                continue;
+            }
+
             String w0 = words.get(0);
-            if (!w0.matches("[0-9]+:")) continue;
-            //long timestep = Integer.parseInt(w0.replace(":", ""));
-            
+            if (!w0.matches("[0-9]+:")) {
+                continue;
+                // long timestep = Integer.parseInt(w0.replace(":", ""));
+            }
+
             // Average packet size
             long packetSize = Long.parseLong(words.get(1));
-            
+
             // Average number of packets
             long packets = Long.parseLong(words.get(2));
-            
+
             means.add(new TimeStep(timestep++, packetSize, packets));
         }
     }
@@ -164,7 +171,7 @@ public class ClusteringMonitor
      */
     public List<TimeStep> normalize()
     {
-//        return this.means;/*
+        // return this.means;/*
 
         double octetsMin = Double.MAX_VALUE;
         double packetsMin = Double.MAX_VALUE;
@@ -186,21 +193,21 @@ public class ClusteringMonitor
         }
         List<TimeStep> means = new ArrayList<TimeStep>();
 
-//        double min = Math.min(packetsMin, octetsMin);
-//        double max = Math.max(packetsMax, octetsMax);
+        // double min = Math.min(packetsMin, octetsMin);
+        // double max = Math.max(packetsMax, octetsMax);
 
-//        for (TimeStep t : this.means) {
-//            means.add(new TimeStep(t.step, (t.octets - min) / (max - min),
-//                    (t.packets - min) / (max - min)));
-//        }
+        // for (TimeStep t : this.means) {
+        // means.add(new TimeStep(t.step, (t.octets - min) / (max - min),
+        // (t.packets - min) / (max - min)));
+        // }
 
-         for (TimeStep t : this.means) {
-         means.add(new TimeStep(t.step, (t.octets - octetsMin)
-         / (octetsMax - octetsMin), (t.packets - packetsMin)
-         / (packetsMax - packetsMin)));
-         }
+        for (TimeStep t : this.means) {
+            means.add(new TimeStep(t.step, (t.octets - octetsMin)
+                    / (octetsMax - octetsMin), (t.packets - packetsMin)
+                    / (packetsMax - packetsMin)));
+        }
         return means;
-//        */
+        // */
 
     }
 
@@ -224,9 +231,7 @@ public class ClusteringMonitor
      */
     public void printKMeans(KMeans<TimeStep> km)
     {
-        // TODO process results (output, or analyze in task 3)
         System.out.println("-----------------------------------------");
-        // km.printClusters(); // maybe we should analyze which cluster is which
 
         List<List<TimeStep>> clusters = km.getClusters();
         for (List<TimeStep> cluster : clusters) {

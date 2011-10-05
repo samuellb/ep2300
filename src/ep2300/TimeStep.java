@@ -38,7 +38,7 @@ public class TimeStep implements Comparable<TimeStep>
     {
         return step + "(" + (int) octets + "," + (int) packets + ")";
     }
-    
+
     @Override
     public int compareTo(TimeStep t)
     {

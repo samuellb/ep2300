@@ -1,7 +1,8 @@
 package ep2300;
 
-import java.util.Collections;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -97,7 +98,7 @@ public class OnlineAnomalyDetection
             detect();
         }
     }
-    
+
     /**
      * Detects anomalies in collected data.
      */
@@ -113,7 +114,7 @@ public class OnlineAnomalyDetection
         int maxSize = 0;
         for (int i = 0; i < numClusters; ++i) {
             List<TimeStep> cluster = km.getClusters().get(i);
-            
+
             centroidValue[i] = distance(0, 0, km.getCentroid(i).octets, km
                     .getCentroid(i).packets);
             // Find biggest centroid value
@@ -145,7 +146,7 @@ public class OnlineAnomalyDetection
             if (size[i] < size[minSize]) {
                 minSize = i;
             }
-            
+
             System.out.printf("contiguity of cluster %d: %f\n", i,
                     getContiguity(cluster));
         }
@@ -155,8 +156,7 @@ public class OnlineAnomalyDetection
         }
 
         for (int i = 0; i < centroidValue.length; ++i) {
-            System.out.printf("centroidValue[%d] = %f\n", i,
-                    centroidValue[i]);
+            System.out.printf("centroidValue[%d] = %f\n", i, centroidValue[i]);
         }
 
         System.out.println("maxCentVal: " + maxCentVal);
@@ -182,12 +182,14 @@ public class OnlineAnomalyDetection
         System.out.println(".. " + km.getCentroid(maxSize).octets);
         System.out.println("avgPackets: " + avgPackets);
         System.out.println(".. " + km.getCentroid(maxSize).packets);
-        
+
         for (int i = 0; i < numClusters; ++i) {
-            if (km.getCentroid(i).octets < 0.01*avgOctets && km.getCentroid(i).packets > avgPackets*100)
+            if (km.getCentroid(i).octets < 0.01 * avgOctets
+                    && km.getCentroid(i).packets > avgPackets * 100) {
                 System.out.println("DDOS: " + i);
+            }
         }
-        
+
         // DDoS
         if (maxCentVal == minSize
                 && km.getCentroid(minSize).octets <= 0.2 * avgOctets) {
@@ -195,47 +197,60 @@ public class OnlineAnomalyDetection
 
             double contiguity = getContiguity(cluster);
             if (contiguity <= 1.4) {
-                System.out.println(minSize + " is a contiguous DOS cluster (contiguity=" + contiguity + ")");
+                System.out.println(minSize
+                        + " is a contiguous DOS cluster (contiguity="
+                        + contiguity + ")");
             }
             else {
                 System.out.println(minSize + " is not contiguous, "
-                        + "but otherwise looks like a dos cluster (contiguity=" + contiguity + ")");
+                        + "but otherwise looks like a dos cluster (contiguity="
+                        + contiguity + ")");
             }
         }
-        
+
         if (minCentVal == maxSize) {
             List<TimeStep> cluster = km.getClusters().get(maxSize);
-            
+
             double contiguity = getContiguity(cluster);
             if (contiguity <= 1.4) {
-                System.out.println(maxSize + " is a contiguous Portscan cluster (contiguity=" + contiguity + ")");
+                System.out.println(maxSize
+                        + " is a contiguous Portscan cluster (contiguity="
+                        + contiguity + ")");
             }
             else {
-                System.out.println(maxSize + " is not contiguous, "
-                        + "but otherwise looks like a portscan cluster (contiguity=" + contiguity + ")");
+                System.out
+                        .println(maxSize
+                                + " is not contiguous, "
+                                + "but otherwise looks like a portscan cluster (contiguity="
+                                + contiguity + ")");
             }
         }
         monitor.printKMeans(km);
     }
-    
+
     /**
      * Determines how contiguous a cluster is. This is defined as the
      * average squared time span between samples in the cluster.
+     * 
+     * @param cluster The cluster to determine contiguity on
+     * @return The contiguity off the cluster
      */
     public double getContiguity(List<TimeStep> cluster)
     {
-        if (cluster.size() <= 1) return 1;
-        
+        if (cluster.size() <= 1) {
+            return 1;
+        }
+
         List<TimeStep> sorted = new ArrayList<TimeStep>(cluster);
         Collections.sort(sorted);
-        
+
         double distSum = 0;
-        for (int i = 0; i < cluster.size()-1; i++) {
-            int diff = sorted.get(i+1).step - sorted.get(i).step;
-            distSum += diff*diff;
+        for (int i = 0; i < cluster.size() - 1; i++) {
+            int diff = sorted.get(i + 1).step - sorted.get(i).step;
+            distSum += diff * diff;
         }
-        
-        return distSum / (double)(cluster.size()-1);
+
+        return distSum / (cluster.size() - 1);
     }
 
     /**
@@ -243,20 +258,21 @@ public class OnlineAnomalyDetection
      * 
      * @param argv CLI arguments containing the first router and the number of
      *            states to collect between anomaly detection
+     * @throws IOException When the file for offline detection cannot be read.
      */
-    public static void main(String[] argv) throws Exception
+    public static void main(String[] argv) throws IOException
     {
         Topology topo;
         int numStates;
         boolean offline = false;
         String monitorFilename = null;
-        
+
         if (argv.length == 3 && argv[0].equals("-f")) {
             // Run on algorithm offline, on saved files
             String topologyFilename = argv[1];
             monitorFilename = argv[2];
             numStates = 0; // not applicable
-            
+
             topo = Topology.fromFile(topologyFilename);
             offline = true;
         }
@@ -277,15 +293,14 @@ public class OnlineAnomalyDetection
             System.exit(2);
             return;
         }
-        
-        
+
         LinkStatistics stats = new LinkStatistics(topo);
 
-        ClusteringMonitor monitor = new ClusteringMonitor(stats, 1,
-                numStates, 3);
+        ClusteringMonitor monitor = new ClusteringMonitor(stats, 1, numStates,
+                3);
 
         OnlineAnomalyDetection OAD = new OnlineAnomalyDetection(monitor);
-        
+
         if (offline) {
             monitor.loadFromFile(monitorFilename);
             OAD.detect();

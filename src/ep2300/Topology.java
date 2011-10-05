@@ -43,10 +43,11 @@ public class Topology implements SnmpClient
     private AtomicInteger outstandingRequests = new AtomicInteger(0);
 
     /**
-     * Default constructor. Only usede by fromFile()
+     * Default constructor. Only used by fromFile()
      */
     private Topology()
     {
+        // Nothing to be done, as we don't do any probing
     }
 
     /**
@@ -62,25 +63,30 @@ public class Topology implements SnmpClient
 
     /**
      * Loads link statistics from a topology output file.
+     * 
+     * @param filename The filename to read the statistics from
+     * @return The topology described in the file
+     * @throws IOException If the file cannot be read
      */
-    public static Topology fromFile(String filename)
-        throws IOException
+    public static Topology fromFile(String filename) throws IOException
     {
         Topology topo = new Topology();
         Router router = null;
-        
+
         for (List<String> words : PatternReader.getLines(filename)) {
-            
-            if (words.size() == 0) continue;
-            
+
+            if (words.size() == 0) {
+                continue;
+            }
+
             String w0 = words.get(0);
             if (w0.matches("^\\w+:$")) {
                 // Start of a new router
                 router = new Router(w0.replace(":", ""));
                 topo.routers.put(router.getSysName(), router);
-                
+
                 // Add interface IPs
-                for (int i = 2; i < words.size()-1; i++) {
+                for (int i = 2; i < words.size() - 1; i++) {
                     String ip = words.get(i);
                     router.addIP(ip);
                     topo.IPToRouter.put(ip, router);
@@ -91,7 +97,7 @@ public class Topology implements SnmpClient
                 router.nextHops.add(w0);
             }
         }
-        
+
         return topo;
     }
 
@@ -238,11 +244,12 @@ public class Topology implements SnmpClient
         }
         UDPSnmpV3.close();
     }
-    
+
     /**
      * Clear all statistics associated with all routers
      */
-    public void clear() {
+    public void clear()
+    {
         for (Router router : routers.values()) {
             router.octets.clear();
             router.packets.clear();
@@ -308,11 +315,12 @@ public class Topology implements SnmpClient
      * of the discovery.
      * 
      * @param args CLI args
+     * @throws IOException Thrown if the topology is read from file and the file
+     *             cannot be read
      */
-    public static void main(String[] args) throws Exception
+    public static void main(String[] args) throws IOException
     {
 
-        
         Topology topo;
         if (args.length == 2 && args[0].equals("-f")) {
             // Read from file
@@ -321,7 +329,7 @@ public class Topology implements SnmpClient
         else if (args.length == 1) {
             // Explore the network
             System.out.println("Discovering the topology...");
-            
+
             topo = new Topology(args[0]);
             topo.waitUntilFinished();
             UDPSnmpV3.close();
