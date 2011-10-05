@@ -1,0 +1,179 @@
+ant compile && (cd build && java -Xdebug -Xrunjdwp:transport=dt_socket,address=8182,server=y,suspend=n ep2300.OnlineAnomalyDetection 192.168.1.10 60)
+Buildfile: build.xml
+
+init:
+
+compile:
+
+BUILD SUCCESSFUL
+Total time: 2 seconds
+Listening for transport dt_socket at address: 8182
+Discovering the topology...
+New router discovered: 	R9
+New router discovered: 	R13
+New router discovered: 	R0
+New router discovered: 	R14
+New router discovered: 	R2
+New router discovered: 	R1
+New router discovered: 	R3
+New router discovered: 	R8
+New router discovered: 	R11
+New router discovered: 	R12
+New router discovered: 	R15
+New router discovered: 	R10
+New router discovered: 	R6
+New router discovered: 	R7
+New router discovered: 	R5
+Invalid response, probing again: .1.3.6.1.6.3.15.1.1.2.0
+Invalid response, probing again: .1.3.6.1.6.3.15.1.1.2.0
+Invalid response, probing again: .1.3.6.1.6.3.15.1.1.2.0
+New router discovered: 	R4
+Discovery finished.
+
+
+Monitoring...
+unfinished requests: 1
+unfinished requests: 2
+1: 282 85
+unfinished requests: 3
+2: 216 188
+unfinished requests: 4
+3: 186 210
+unfinished requests: 5
+4: 257 60
+unfinished requests: 6
+5: 269 119
+unfinished requests: 7
+6: 290 63
+unfinished requests: 8
+7: 264 65
+unfinished requests: 9
+8: 287 55
+unfinished requests: 10
+9: 259 72
+unfinished requests: 11
+10: 242 82
+unfinished requests: 12
+11: 270 74
+unfinished requests: 13
+12: 345 30
+unfinished requests: 14
+13: 276 62
+unfinished requests: 14
+14: 2 147702277
+unfinished requests: 15
+15: 279 170
+unfinished requests: 16
+16: 317 87
+unfinished requests: 17
+17: 287 79
+unfinished requests: 18
+18: 241 137
+unfinished requests: 20
+19: 273 117
+unfinished requests: 21
+20: 272 108
+unfinished requests: 22
+21: 250 98
+unfinished requests: 24
+22: 258 90
+unfinished requests: 24
+23: 293 64
+unfinished requests: 25
+24: 317 63
+unfinished requests: 26
+25: 289 97
+unfinished requests: 27
+26: 291 73
+unfinished requests: 28
+27: 285 85
+unfinished requests: 29
+28: 290 97
+unfinished requests: 31
+29: 251 102
+unfinished requests: 32
+30: 271 131
+unfinished requests: 33
+31: 283 90
+unfinished requests: 35
+32: 199 225
+unfinished requests: 36
+33: 224 154
+unfinished requests: 37
+34: 314 73
+unfinished requests: 38
+35: 278 100
+unfinished requests: 39
+36: 284 88
+unfinished requests: 39
+37: 269 228
+unfinished requests: 40
+38: 275 257
+unfinished requests: 41
+39: 265 242
+unfinished requests: 43
+40: 281 256
+unfinished requests: 44
+41: 270 246
+unfinished requests: 45
+42: 267 247
+unfinished requests: 46
+43: 265 254
+unfinished requests: 47
+44: 265 276
+unfinished requests: 48
+45: 268 283
+unfinished requests: 49
+46: 276 249
+unfinished requests: 50
+47: 273 237
+unfinished requests: 51
+48: 263 240
+unfinished requests: 52
+49: 283 244
+unfinished requests: 53
+50: 268 270
+unfinished requests: 54
+51: 265 261
+unfinished requests: 55
+52: 285 247
+unfinished requests: 57
+53: 277 270
+unfinished requests: 58
+54: 263 247
+unfinished requests: 59
+55: 264 239
+unfinished requests: 60
+56: 270 225
+unfinished requests: 61
+57: 267 256
+unfinished requests: 62
+58: 272 269
+unfinished requests: 64
+59: 276 240
+contiguity of cluster 0: 1,358491
+contiguity of cluster 1: 281,000000
+contiguity of cluster 2: 1,000000
+size[0] = 0,203351
+size[1] = 0,072416
+size[2] = 0,000000
+centroidValue[0] = 0,796649
+centroidValue[1] = 0,572355
+centroidValue[2] = 1,000000
+maxCentVal: 2
+minSize: 2
+minCentVal: 1
+maxSize: 0
+avgOctets: 0.7697330235166848
+.. 0.7966494606825322
+avgPackets: 0.016950015700982847
+.. 1.481020124122604E-6
+2 is a contiguous DOS cluster (contiguity=1.0)
+-----------------------------------------
+cluster:
+    1(282,85)  4(257,60)  5(269,119)  6(290,63)  7(264,65)  8(287,55)  9(259,72)  10(242,82)  11(270,74)  12(345,30)  13(276,62)  15(279,170)  16(317,87)  17(287,79)  18(241,137)  19(273,117)  20(272,108)  21(250,98)  22(258,90)  23(293,64)  24(317,63)  25(289,97)  26(291,73)  27(285,85)  28(290,97)  29(251,102)  30(271,131)  31(283,90)  34(314,73)  35(278,100)  36(284,88)  37(269,228)  38(275,257)  39(265,242)  40(281,256)  41(270,246)  42(267,247)  43(265,254)  44(265,276)  45(268,283)  46(276,249)  47(273,237)  48(263,240)  49(283,244)  50(268,270)  51(265,261)  52(285,247)  53(277,270)  54(263,247)  55(264,239)  56(270,225)  57(267,256)  58(272,269)  59(276,240)
+cluster:
+    2(216,188)  3(186,210)  32(199,225)  33(224,154)
+cluster:
+    14(2,147702277)
+
