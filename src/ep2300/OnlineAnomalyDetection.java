@@ -147,22 +147,22 @@ public class OnlineAnomalyDetection
                 minSize = i;
             }
 
-            System.out.printf("contiguity of cluster %d: %f\n", i,
-                    getContiguity(cluster));
+            // System.out.printf("contiguity of cluster %d: %f\n", i,
+            // getContiguity(cluster));
         }
 
-        for (int i = 0; i < size.length; ++i) {
-            System.out.printf("size[%d] = %f\n", i, size[i]);
-        }
-
-        for (int i = 0; i < centroidValue.length; ++i) {
-            System.out.printf("centroidValue[%d] = %f\n", i, centroidValue[i]);
-        }
-
-        System.out.println("maxCentVal: " + maxCentVal);
-        System.out.println("minSize: " + minSize);
-        System.out.println("minCentVal: " + minCentVal);
-        System.out.println("maxSize: " + maxSize);
+        // for (int i = 0; i < size.length; ++i) {
+        // System.out.printf("size[%d] = %f\n", i, size[i]);
+        // }
+        //
+        // for (int i = 0; i < centroidValue.length; ++i) {
+        // System.out.printf("centroidValue[%d] = %f\n", i, centroidValue[i]);
+        // }
+        //
+        // System.out.println("maxCentVal: " + maxCentVal);
+        // System.out.println("minSize: " + minSize);
+        // System.out.println("minCentVal: " + minCentVal);
+        // System.out.println("maxSize: " + maxSize);
 
         // Calculate average packet size of the centroids
         double avgOctets = 0;
@@ -178,31 +178,30 @@ public class OnlineAnomalyDetection
         avgOctets /= k;
         avgPackets /= k;
 
-        System.out.println("avgOctets: " + avgOctets);
-        System.out.println(".. " + km.getCentroid(maxSize).octets);
-        System.out.println("avgPackets: " + avgPackets);
-        System.out.println(".. " + km.getCentroid(maxSize).packets);
-
+        boolean ddos = false;
         for (int i = 0; i < numClusters; ++i) {
             if (km.getCentroid(i).octets < 0.01 * avgOctets
                     && km.getCentroid(i).packets > avgPackets * 100) {
-                System.out.println("DDOS: " + i);
+                System.err.println("Cluster " + i + ":");
+                System.out.println("An anomaly detected: DDoS");
+                ddos = true;
             }
         }
 
         // DDoS
-        if (maxCentVal == minSize
+        if (!ddos && maxCentVal == minSize
                 && km.getCentroid(minSize).octets <= 0.2 * avgOctets) {
             List<TimeStep> cluster = km.getClusters().get(minSize);
 
             double contiguity = getContiguity(cluster);
             if (contiguity <= 1.4) {
-                System.out.println(minSize
+                System.out.println("An anomaly detected: DDoS");
+                System.err.println(minSize
                         + " is a contiguous DOS cluster (contiguity="
                         + contiguity + ")");
             }
             else {
-                System.out.println(minSize + " is not contiguous, "
+                System.err.println(minSize + " is not contiguous, "
                         + "but otherwise looks like a dos cluster (contiguity="
                         + contiguity + ")");
             }
@@ -213,12 +212,13 @@ public class OnlineAnomalyDetection
 
             double contiguity = getContiguity(cluster);
             if (contiguity <= 1.4) {
-                System.out.println(maxSize
+                System.out.println("An anomaly detected: portscan");
+                System.err.println(maxSize
                         + " is a contiguous Portscan cluster (contiguity="
                         + contiguity + ")");
             }
             else {
-                System.out
+                System.err
                         .println(maxSize
                                 + " is not contiguous, "
                                 + "but otherwise looks like a portscan cluster (contiguity="

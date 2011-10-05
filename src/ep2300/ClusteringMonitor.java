@@ -125,7 +125,7 @@ public class ClusteringMonitor
             stats.update();
             int unfinished = stats.waitUntilFinished(interval);
             if (unfinished > 0) {
-                System.out.println("unfinished requests: " + unfinished);
+                System.err.println("unfinished requests: " + unfinished);
             }
 
             Collection<Router> routers = stats.getTopology().getTopology()

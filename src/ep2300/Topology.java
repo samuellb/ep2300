@@ -139,8 +139,8 @@ public class Topology implements SnmpClient
     {
         try {
             if (pdu.getErrstat() != 0) {
-                System.out.println("A request has failed:");
-                System.out.println(pdu.getError());
+                System.err.println("A request has failed:");
+                System.err.println(pdu.getError());
                 return true; // No further processing is needed since the
                 // request
                 // failed
@@ -210,7 +210,7 @@ public class Topology implements SnmpClient
                 }
                 else {
                     // The callback was not a ipRouteNextHop
-                    System.out.println("Invalid response, probing again: "
+                    System.err.println("Invalid response, probing again: "
                             + pdu.getObjectID(0));
                     probe(routerIP);
                     return false;
