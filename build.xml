@@ -101,9 +101,7 @@
   <target name="run-onlineanomalydetection" depends="compile">
     <java classname="ep2300.OnlineAnomalyDetection" fork="true">
       <arg value="192.168.1.10" />
-      <arg value="1500" />
-      <arg value="20000" />
-      <arg value="3" />
+      <arg value="30" />
       <classpath>
         <path refid="snmp.path" />
         <pathelement location="${build}"/>

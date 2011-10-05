@@ -20,16 +20,17 @@ public class ClusteringMonitor
      * 
      * @param stats The statistics over the network
      * @param interval The interval between statistics gathering
-     * @param timespan The total time to perform monitoring over
+     * @param numTimeSteps The number of datapoints to collect,
+     *            numTimeSteps*interval is the total time of execution.
      * @param numClusters The number of clusters in the clustering.
      */
-    public ClusteringMonitor(LinkStatistics stats, int interval, int timespan,
-            int numClusters)
+    public ClusteringMonitor(LinkStatistics stats, int interval,
+            int numTimeSteps, int numClusters)
     {
         this.stats = stats;
         this.interval = interval;
         this.numClusters = numClusters;
-        numTimeSteps = timespan / interval;
+        this.numTimeSteps = numTimeSteps;
     }
 
     /**
@@ -136,6 +137,8 @@ public class ClusteringMonitor
      */
     public List<TimeStep> normalize()
     {
+//        return this.means;/*
+
         double octetsMin = Double.MAX_VALUE;
         double packetsMin = Double.MAX_VALUE;
         double octetsMax = 0, packetsMax = 0;
@@ -154,14 +157,23 @@ public class ClusteringMonitor
                 packetsMax = t.packets;
             }
         }
+        double min = Math.min(packetsMin, octetsMin);
+        double max = Math.max(packetsMax, octetsMax);
 
         List<TimeStep> means = new ArrayList<TimeStep>();
-        for (TimeStep t : this.means) {
-            means.add(new TimeStep(t.step, (t.octets - octetsMin)
-                    / (octetsMax - octetsMin), (t.packets - packetsMin)
-                    / (packetsMax - packetsMin)));
-        }
+//        for (TimeStep t : this.means) {
+//            means.add(new TimeStep(t.step, (t.octets - min) / (max - min),
+//                    (t.packets - min) / (max - min)));
+//        }
+
+         for (TimeStep t : this.means) {
+         means.add(new TimeStep(t.step, (t.octets - octetsMin)
+         / (octetsMax - octetsMin), (t.packets - packetsMin)
+         / (packetsMax - packetsMin)));
+         }
         return means;
+//        */
+
     }
 
     /**
@@ -226,7 +238,7 @@ public class ClusteringMonitor
         LinkStatistics stats = new LinkStatistics(topo);
 
         ClusteringMonitor monitor = new ClusteringMonitor(stats, interval,
-                timespan, numClusters);
+                timespan / interval, numClusters);
         monitor.run();
 
         UDPSnmpV3.close();
