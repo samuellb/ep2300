@@ -193,7 +193,14 @@ public class OnlineAnomalyDetection
                 && km.getCentroid(minSize).octets <= 0.2 * avgOctets) {
             List<TimeStep> cluster = km.getClusters().get(minSize);
 
-            System.out.println(minSize + " is DDOS cluster ");
+            double contiguity = getContiguity(cluster);
+            if (contiguity <= 1.4) {
+                System.out.println(minSize + " is a contiguous DOS cluster (contiguity=" + contiguity + ")");
+            }
+            else {
+                System.out.println(minSize + " is not contiguous, "
+                        + "but otherwise looks like a dos cluster (contiguity=" + contiguity + ")");
+            }
         }
         
         if (minCentVal == maxSize) {
@@ -217,6 +224,8 @@ public class OnlineAnomalyDetection
      */
     public double getContiguity(List<TimeStep> cluster)
     {
+        if (cluster.size() <= 1) return 1;
+        
         List<TimeStep> sorted = new ArrayList<TimeStep>(cluster);
         Collections.sort(sorted);
         
