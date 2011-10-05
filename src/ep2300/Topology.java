@@ -61,7 +61,7 @@ public class Topology implements SnmpClient
     }
 
     /**
-     * Loads link statistics from an output file.
+     * Loads link statistics from a topology output file.
      */
     public static Topology fromFile(String filename)
         throws IOException
@@ -93,6 +93,34 @@ public class Topology implements SnmpClient
         }
         
         return topo;
+    }
+    
+    /**
+     * Loads link statistics from a topology and monitor output file.
+     */
+    public static LinkStatistics fromTopologyMonitorFiles(
+            String topoFilename, String statsFilename) throws IOException
+    {
+        Topology topo = Topology.fromFile(topoFilename);
+
+        // Local information is not saved, so we put everthing in 192.168.1.10
+        Router router = topo.getRouterFromIP("192.168.1.10");
+        for (List<String> words : PatternReader.getLines(statsFilename)) {
+
+                if (words.size() != 3) continue;
+                
+                String w0 = words.get(0);
+                if (!w0.matches("[0-9]+:")) continue;
+                //long timestep = Integer.parseInt(w0.replace(":", ""));
+                
+                // Average packet size
+                router.octets.add(Long.parseLong(words.get(1)));
+                
+                // Number of packets
+                router.packets.add(Long.parseLong(words.get(2)));
+        }
+
+        return new LinkStatistics(topo);
     }
 
     /**
