@@ -8,7 +8,8 @@ import com.adventnet.snmp.snmp2.SnmpPDU;
 import com.adventnet.snmp.snmp2.SnmpSession;
 
 /**
- * A simple class containing constants and general functions regarding SNMP
+ * A simple class containing constants and general functions regarding SNMP.
+ * It keeps track of all connections.
  */
 public class SNMP
 {

@@ -7,6 +7,8 @@ import java.util.List;
 
 /**
  * Monitor what clusters exists in the statistical data inside the network.
+ * This is done through a LinkStatistics object which performs all SNMP
+ * polling, and provides data back to the monitor.
  */
 public class ClusteringMonitor
 {

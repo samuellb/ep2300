@@ -12,6 +12,8 @@ import com.adventnet.snmp.snmp2.UDPProtocolOptions;
 
 /**
  * Maintains statistics about the sent data on all links in a network.
+ * Performs SNMP polling through the SNMP class and the SnmpClient callback
+ * interface.
  */
 public final class LinkStatistics implements SnmpClient
 {
