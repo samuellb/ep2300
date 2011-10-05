@@ -159,11 +159,28 @@ public class OnlineAnomalyDetection
 
         // Calculate average packet size of the centroids
         double avgOctets = 0;
+        double avgPackets = 0;
+        int k = 0;
         for (int i = 0; i < numClusters; ++i) {
-            avgOctets += km.getCentroid(i).octets;
+            for (TimeStep t : km.getClusters().get(i)) {
+                avgOctets += t.octets;
+                avgPackets += t.packets;
+                k++;
+            }
         }
-        avgOctets /= numClusters;
+        avgOctets /= k;
+        avgPackets /= k;
 
+        System.out.println("avgOctets: " + avgOctets);
+        System.out.println(".. " + km.getCentroid(maxSize).octets);
+        System.out.println("avgPackets: " + avgPackets);
+        System.out.println(".. " + km.getCentroid(maxSize).packets);
+        
+        for (int i = 0; i < numClusters; ++i) {
+            if (km.getCentroid(i).octets < 0.01*avgOctets && km.getCentroid(i).packets > avgPackets*100)
+                System.out.println("DDOS: " + i);
+        }
+        
         // DDoS
         if (maxCentVal == minSize
                 && km.getCentroid(minSize).octets <= 0.2 * avgOctets) {
