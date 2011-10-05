@@ -159,9 +159,17 @@ public class OnlineAnomalyDetection
         System.out.println("minSize: " + minSize);
         System.out.println("minCentVal: " + minCentVal);
         System.out.println("maxSize: " + maxSize);
+        
+        
+        // Calculate average packet size of the centroids
+        double avgOctets = 0;
+        for (int i = 0; i < numClusters; ++i) {
+            avgOctets += km.getCentroid(i).octets;
+        }
+        avgOctets /= (double)numClusters;
 
         // DDoS
-        if (maxCentVal == minSize) {
+        if (maxCentVal == minSize && km.getCentroid(minSize).octets <= 0.2*avgOctets) {
             System.out.println(minSize + " is DDOS cluster!!!");
         }
         if (minCentVal == maxSize) {
