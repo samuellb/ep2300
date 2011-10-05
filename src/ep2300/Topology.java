@@ -204,6 +204,16 @@ public class Topology implements SnmpClient
         }
         UDPSnmpV3.close();
     }
+    
+    /**
+     * Clear all statistics associated with all routers
+     */
+    public void clear() {
+        for (Router router : routers.values()) {
+            router.octets.clear();
+            router.packets.clear();
+        }
+    }
 
     @Override
     public void debugPrint(String debugOutput)

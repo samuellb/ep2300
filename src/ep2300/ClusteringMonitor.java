@@ -85,6 +85,7 @@ public class ClusteringMonitor
     public final void collectData()
     {
         means.clear();
+        stats.clear();
         for (int t = 0; t < numTimeSteps; t++) {
 
             long startTime = System.currentTimeMillis();
@@ -158,10 +159,11 @@ public class ClusteringMonitor
                 packetsMax = t.packets;
             }
         }
-        double min = Math.min(packetsMin, octetsMin);
-        double max = Math.max(packetsMax, octetsMax);
-
         List<TimeStep> means = new ArrayList<TimeStep>();
+
+//        double min = Math.min(packetsMin, octetsMin);
+//        double max = Math.max(packetsMax, octetsMax);
+
 //        for (TimeStep t : this.means) {
 //            means.add(new TimeStep(t.step, (t.octets - min) / (max - min),
 //                    (t.packets - min) / (max - min)));

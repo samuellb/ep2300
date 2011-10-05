@@ -1,6 +1,5 @@
 package ep2300;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -8,25 +7,8 @@ import java.util.List;
  */
 public class OnlineAnomalyDetection
 {
-    private class Result
-    {
-        KMeans<TimeStep> km;
-        double centroidX[];
-        double centroidY[];
-
-        public Result(KMeans<TimeStep> km, double[] centroidX,
-                double[] centroidY)
-        {
-            this.km = km;
-            this.centroidX = centroidX;
-            this.centroidY = centroidY;
-        }
-    }
-
     private ClusteringMonitor monitor;
-    private List<Integer> DBI = new ArrayList<Integer>();
     private List<TimeStep> means;
-    private List<TimeStep> rawMeans;
 
     /**
      * Create a new anomaly detector
@@ -104,6 +86,9 @@ public class OnlineAnomalyDetection
                 * (y2 - packets));
     }
 
+    /**
+     * Run the algorithm, this will collect data and detect anomalies
+     */
     public void run()
     {
         while (true) {
@@ -119,10 +104,12 @@ public class OnlineAnomalyDetection
                 centroidValue[i] = distance(0, 0, km.getCentroid(i).octets, km
                         .getCentroid(i).packets);
                 // Find biggest centroid value
-                if (centroidValue[i] > centroidValue[maxCentVal])
+                if (centroidValue[i] > centroidValue[maxCentVal]) {
                     maxCentVal = i;
-                if (centroidValue[i] < centroidValue[minCentVal])
+                }
+                if (centroidValue[i] < centroidValue[minCentVal]) {
                     minCentVal = i;
+                }
 
                 double dist = 0;
 
@@ -139,10 +126,12 @@ public class OnlineAnomalyDetection
                 // cluster
                 // size[i] = km.getClusters().get(i).size();
 
-                if (size[i] > size[maxSize])
+                if (size[i] > size[maxSize]) {
                     maxSize = i;
-                if (size[i] < size[minSize])
+                }
+                if (size[i] < size[minSize]) {
                     minSize = i;
+                }
             }
 
             for (int i = 0; i < size.length; ++i) {
@@ -164,7 +153,7 @@ public class OnlineAnomalyDetection
             for (int i = 0; i < numClusters; ++i) {
                 avgOctets += km.getCentroid(i).octets;
             }
-            avgOctets /= (double) numClusters;
+            avgOctets /= numClusters;
 
             // DDoS
             if (maxCentVal == minSize
@@ -189,6 +178,12 @@ public class OnlineAnomalyDetection
         }
     }
 
+    /**
+     * Start online anomaly detection
+     * 
+     * @param argv CLI arguments containing the first router and the number of
+     *            states to collect between anomaly detection
+     */
     public static void main(String[] argv)
     {
         if (argv.length != 2) {
@@ -212,9 +207,6 @@ public class OnlineAnomalyDetection
 
         OnlineAnomalyDetection OAD = new OnlineAnomalyDetection(monitor);
         OAD.run();
-
-        // monitor.printKMeans((new
-        // OnlineAnomalyDetection(monitor)).getBestKM().km);
 
         UDPSnmpV3.close();
     }

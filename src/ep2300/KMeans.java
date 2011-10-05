@@ -91,14 +91,27 @@ public abstract class KMeans<T>
         }
     }
 
-    public int[] getCentroids() {
+    /**
+     * Get the centroids of all clusters
+     * 
+     * @return The centroids
+     */
+    public int[] getCentroids()
+    {
         return centroids;
     }
-    
-    public T getCentroid(int i) {
+
+    /**
+     * Get the centroid of the i'th cluster
+     * 
+     * @param i The cluster number to get the centroid for
+     * @return The centroid for the specified cluster
+     */
+    public T getCentroid(int i)
+    {
         return samples.get(centroids[i]);
     }
-    
+
     /**
      * Get the clusters formed as a 2 dimensional list.
      * 
@@ -153,13 +166,13 @@ public abstract class KMeans<T>
 
     /**
      * Update all clusters
-     *
-     * @returns true if one or more clusters were changed.
+     * 
+     * @return true if one or more clusters were changed.
      */
     public boolean updateClusters()
     {
         boolean changed = false;
-        
+
         List<List<T>> clusters = getClusters();
         for (int ki = 0; ki < k; ki++) {
             // Calculate mean inside this cluster
@@ -180,7 +193,7 @@ public abstract class KMeans<T>
                     diff = thisdiff;
                 }
             }
-            
+
             // Is this a new centroid?
             if (centroids[ki] != closest) {
                 // Update centroid
@@ -188,7 +201,7 @@ public abstract class KMeans<T>
                 changed = true;
             }
         }
-        
+
         return changed;
     }
 
@@ -205,7 +218,7 @@ public abstract class KMeans<T>
             }
         }
     }
-    
+
     /**
      * Removes all empty clusters
      */
@@ -213,12 +226,14 @@ public abstract class KMeans<T>
     {
         int newk = 0;
         List<List<T>> clusters = getClusters();
-        
+
         // Count non-empty clusters
         for (int ki = 0; ki < k; ki++) {
-            if (clusters.get(ki).size() != 0) newk++;
+            if (clusters.get(ki).size() != 0) {
+                newk++;
+            }
         }
-        
+
         // Create a new list with only non-empty clusters
         int[] newCentroids = new int[newk];
         int newki = 0;
@@ -227,7 +242,7 @@ public abstract class KMeans<T>
                 newCentroids[newki++] = centroids[ki];
             }
         }
-        
+
         centroids = newCentroids;
         k = newk;
     }

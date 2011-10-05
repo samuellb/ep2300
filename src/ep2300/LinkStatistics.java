@@ -113,6 +113,15 @@ public final class LinkStatistics implements SnmpClient
     }
 
     /**
+     * Clear all statistics gathered
+     */
+    public void clear()
+    {
+        topology.clear();
+        outstandingRequests.set(0);
+    }
+
+    /**
      * Waits until all requests have finished, or at most timeout
      * milliseconds. Returns the number of unfinished requests.
      * 
