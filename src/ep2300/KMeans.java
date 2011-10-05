@@ -91,6 +91,14 @@ public abstract class KMeans<T>
         }
     }
 
+    public int[] getCentroids() {
+        return centroids;
+    }
+    
+    public T getCentroid(int i) {
+        return samples.get(centroids[i]);
+    }
+    
     /**
      * Get the clusters formed as a 2 dimensional list.
      * 

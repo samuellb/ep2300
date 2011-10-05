@@ -43,48 +43,30 @@ public class OnlineAnomalyDetection
      * 
      * @return The best clustering found
      */
-    public Result getBestKM()
+    public KMeans<TimeStep> getBestKM()
     {
         monitor.collectData();
         rawMeans = monitor.getMeans();
         means = monitor.normalize();
 
         double minDB = Double.MAX_VALUE;
-        Result bestKM = null;
+        KMeans<TimeStep> bestKM = null;
 
         for (int iterations = 1; iterations <= 20; ++iterations) {
             KMeans<TimeStep> km = new RouterKMeans(means, 3);
-            km.updateClusters(100);
+            km.updateClusters(1000);
 
+            km.removeEmptyClusters();
+            
             List<List<TimeStep>> clusters = km.getClusters();
-            for (int i = 0; i < clusters.size(); ++i) {
-                if (clusters.get(i).size() == 0) {
-                    clusters.remove(i--);
-                }
-            }
 
             int n = clusters.size();
-            double centroidX[] = new double[n];
-            double centroidY[] = new double[n];
-
-            // Calculate centroids of clusters
-            for (int i = 0; i < n; ++i) {
-                centroidX[i] = 0;
-                centroidY[i] = 0;
-                List<TimeStep> cluster = clusters.get(i);
-                for (int j = 0; j < cluster.size(); ++j) {
-                    centroidX[i] += cluster.get(j).octets;
-                    centroidY[i] += cluster.get(j).packets;
-                }
-                centroidX[i] /= clusters.size();
-                centroidY[i] /= clusters.size();
-            }
 
             double avgDist[] = new double[n];
             for (int i = 0; i < n; ++i) {
                 avgDist[i] = 0;
                 for (TimeStep t : clusters.get(i)) {
-                    avgDist[i] += distance(t, centroidX[i], centroidY[i]);
+                    avgDist[i] += distance(t, km.getCentroid(i));
                 }
                 avgDist[i] /= clusters.get(i).size();
             }
@@ -97,23 +79,22 @@ public class OnlineAnomalyDetection
                         continue;
                     }
                     max = Math.max(max, (avgDist[i] + avgDist[j])
-                            / distance(centroidX[i], centroidY[i],
-                                    centroidX[j], centroidY[j]));
+                            / distance(km.getCentroid(i), km.getCentroid(j)));
                 }
                 DB += max;
             }
             DB /= n;
             // System.out.printf("%s: %f\n", iterations, DB);
             if (DB < minDB) {
-                bestKM = new Result(km, centroidX, centroidY);
+                bestKM = km;
             }
         }
         return bestKM;
     }
 
-    private double distance(TimeStep a, double octets, double packets)
+    private double distance(TimeStep a, TimeStep b)
     {
-        return distance(a.octets, a.packets, octets, packets);
+        return distance(a.octets, a.packets, b.octets, b.packets);
 
     }
 
@@ -125,16 +106,17 @@ public class OnlineAnomalyDetection
 
     public void run()
     {
-        Result res = getBestKM();
-        double centroidValue[] = new double[res.centroidX.length];
-        double size[] = new double[res.centroidX.length];
+        KMeans<TimeStep> km = getBestKM();
+        int numClusters = km.getClusters().size();
+        double centroidValue[] = new double[numClusters];
+        double size[] = new double[numClusters];
         int minCentVal = 0;
         int maxCentVal = 0;
         int minSize = 0;
         int maxSize = 0;
-        for (int i = 0; i < res.centroidX.length; ++i) {
-            centroidValue[i] = distance(0, 0, res.centroidX[i],
-                    res.centroidY[i]);
+        for (int i = 0; i < numClusters; ++i) {
+            centroidValue[i] = distance(0, 0, km.getCentroid(i).octets,
+                    km.getCentroid(i).packets);
             // Find biggest centroid value
             if (centroidValue[i] > centroidValue[maxCentVal])
                 maxCentVal = i;
@@ -145,8 +127,8 @@ public class OnlineAnomalyDetection
 
             // Get the size of the clusters depending on the maximum distance
             // from their centroid
-            for (TimeStep t : res.km.getClusters().get(i)) {
-                double curDist = distance(t, res.centroidX[i], res.centroidY[i]);
+            for (TimeStep t : km.getClusters().get(i)) {
+                double curDist = distance(t, km.getCentroid(i));
                 dist = Math.max(curDist, dist);
             }
             size[i] = dist;
@@ -185,7 +167,7 @@ public class OnlineAnomalyDetection
         if (minCentVal == maxSize) {
             System.out.println(maxSize + " is Portscan cluster!!!");
         }
-        monitor.printKMeans(res.km);
+        monitor.printKMeans(km);
     }
 
     public static void main(String[] argv)
