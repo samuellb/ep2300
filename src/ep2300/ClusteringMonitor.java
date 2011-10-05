@@ -84,6 +84,7 @@ public class ClusteringMonitor
      */
     public final void collectData()
     {
+        means.clear();
         for (int t = 0; t < numTimeSteps; t++) {
 
             long startTime = System.currentTimeMillis();
