@@ -164,24 +164,30 @@ public class OnlineAnomalyDetection
         // System.out.println("minCentVal: " + minCentVal);
         // System.out.println("maxSize: " + maxSize);
 
-        // Calculate average packet size of the centroids
-        double avgOctets = 0;
-        double avgPackets = 0;
-        int k = 0;
-        for (int i = 0; i < numClusters; ++i) {
-            for (TimeStep t : km.getClusters().get(i)) {
-                avgOctets += t.octets;
-                avgPackets += t.packets;
-                k++;
+        double[] avgOctets = new double[numClusters];
+        double[] avgPackets = new double[numClusters];
+        for (int j = 0; j < numClusters; ++j) {
+            // Calculate average packet size of all other clusters
+            int k = 0;
+            for (int i = 0; i < numClusters; ++i) {
+                if (j == i) continue;
+                
+                for (TimeStep t : km.getClusters().get(i)) {
+                    avgOctets[j] += t.octets;
+                    avgPackets[j] += t.packets;
+                    k++;
+                }
             }
+            avgOctets[j] /= k;
+            avgPackets[j] /= k;
         }
-        avgOctets /= k;
-        avgPackets /= k;
 
         boolean dos = false;
         for (int i = 0; i < numClusters; ++i) {
-            if (km.getCentroid(i).octets < 0.01 * avgOctets
-                    && km.getCentroid(i).packets > avgPackets * 100) {
+            System.out.printf("  %f   %f   %f   %f\n", km.getCentroid(i).octets, avgOctets[i], 
+                    km.getCentroid(i).packets, avgPackets[i]);
+            if (km.getCentroid(i).octets < 0.01 * avgOctets[i]
+                    && km.getCentroid(i).packets > avgPackets[i] * 100) {
                 System.err.println("Cluster " + i + ":");
                 System.out.println("An anomaly detected: DoS");
                 dos = true;
@@ -190,7 +196,7 @@ public class OnlineAnomalyDetection
 
         // DoS
         if (!dos && maxCentVal == minSize
-                && km.getCentroid(minSize).octets <= 0.2 * avgOctets) {
+                && km.getCentroid(minSize).octets <= 0.2 * avgOctets[minSize]) {
             List<TimeStep> cluster = km.getClusters().get(minSize);
 
             double contiguity = getContiguity(cluster);
