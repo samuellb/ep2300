@@ -105,130 +105,78 @@ public class OnlineAnomalyDetection
     public void detect()
     {
         KMeans<TimeStep> km = getBestKM();
-        int numClusters = km.getClusters().size();
-        double centroidValue[] = new double[numClusters];
-        double size[] = new double[numClusters];
-        int minCentVal = 0;
-        int maxCentVal = 0;
-        int minSize = 0;
-        int maxSize = 0;
-        for (int i = 0; i < numClusters; ++i) {
-            List<TimeStep> cluster = km.getClusters().get(i);
+        List<List<TimeStep>> clusters = km.getClusters();
+        int numClusters = clusters.size();
 
-            centroidValue[i] = distance(0, 0, km.getCentroid(i).octets, km
-                    .getCentroid(i).packets);
-            // Find biggest centroid value
-            if (centroidValue[i] > centroidValue[maxCentVal]) {
-                maxCentVal = i;
-            }
-            if (centroidValue[i] < centroidValue[minCentVal]) {
-                minCentVal = i;
-            }
-
-            double dist = 0;
-
-            // Get the size of the clusters depending on the maximum
-            // distance
-            // from their centroid
-            for (TimeStep t : cluster) {
-                double curDist = distance(t, km.getCentroid(i));
-                dist = Math.max(curDist, dist);
-            }
-            size[i] = dist;
-
-            // Get the smallest cluster depending on number of elements in
-            // cluster
-            // size[i] = km.getClusters().get(i).size();
-
-            if (size[i] > size[maxSize]) {
-                maxSize = i;
-            }
-            if (size[i] < size[minSize]) {
-                minSize = i;
-            }
-
-            // System.out.printf("contiguity of cluster %d: %f\n", i,
-            // getContiguity(cluster));
-        }
-
-        // for (int i = 0; i < size.length; ++i) {
-        // System.out.printf("size[%d] = %f\n", i, size[i]);
-        // }
-        //
-        // for (int i = 0; i < centroidValue.length; ++i) {
-        // System.out.printf("centroidValue[%d] = %f\n", i, centroidValue[i]);
-        // }
-        //
-        // System.out.println("maxCentVal: " + maxCentVal);
-        // System.out.println("minSize: " + minSize);
-        // System.out.println("minCentVal: " + minCentVal);
-        // System.out.println("maxSize: " + maxSize);
-
-        double[] avgOctets = new double[numClusters];
-        double[] avgPackets = new double[numClusters];
+        // These arrays contain averages of all other clusters. For example
+        // on index 0 they contain an average of clusters 1, 2... but not 0.
+        double[] avgOctetsNotIn = new double[numClusters];
+        double[] avgPacketsNotIn = new double[numClusters];
+        double[] avgClusterSizeNotIn = new double[numClusters];
         for (int j = 0; j < numClusters; ++j) {
             // Calculate average packet size of all other clusters
             int k = 0;
             for (int i = 0; i < numClusters; ++i) {
                 if (j == i) continue;
                 
-                for (TimeStep t : km.getClusters().get(i)) {
-                    avgOctets[j] += t.octets;
-                    avgPackets[j] += t.packets;
+                List<TimeStep> cluster = clusters.get(i);
+                for (TimeStep t : cluster) {
+                    avgOctetsNotIn[j] += t.octets;
+                    avgPacketsNotIn[j] += t.packets;
                     k++;
                 }
+                avgClusterSizeNotIn[j] += cluster.size();
             }
-            avgOctets[j] /= k;
-            avgPackets[j] /= k;
-        }
-
-        boolean dos = false;
-        for (int i = 0; i < numClusters; ++i) {
-            System.out.printf("  %f   %f   %f   %f\n", km.getCentroid(i).octets, avgOctets[i], 
-                    km.getCentroid(i).packets, avgPackets[i]);
-            if (km.getCentroid(i).octets < 0.01 * avgOctets[i]
-                    && km.getCentroid(i).packets > avgPackets[i] * 100) {
-                System.err.println("Cluster " + i + ":");
-                System.out.println("An anomaly detected: DoS");
-                dos = true;
-            }
+            avgOctetsNotIn[j] /= k;
+            avgPacketsNotIn[j] /= k;
+            avgClusterSizeNotIn[j] /= numClusters-1;
         }
 
         // DoS
-        if (!dos && maxCentVal == minSize
-                && km.getCentroid(minSize).octets <= 0.2 * avgOctets[minSize]) {
-            List<TimeStep> cluster = km.getClusters().get(minSize);
-
-            double contiguity = getContiguity(cluster);
-            if (contiguity <= 1.4) {
-                System.out.println("An anomaly detected: DoS");
-                System.err.println(minSize
-                        + " is a contiguous DOS cluster (contiguity="
-                        + contiguity + ")");
-            }
-            else {
-                System.err.println(minSize + " is not contiguous, "
-                        + "but otherwise looks like a dos cluster (contiguity="
-                        + contiguity + ")");
+        for (int i = 0; i < numClusters; ++i) {
+            List<TimeStep> cluster = clusters.get(i);
+            
+            if (km.getCentroid(i).octets < 0.1 * avgOctetsNotIn[i]
+                    && km.getCentroid(i).packets > 10 * avgPacketsNotIn[i]
+                    && cluster.size() < 0.3 * avgClusterSizeNotIn[i]) {
+                
+                double contiguity = getContiguity(cluster);
+                if (contiguity <= 1.4) {
+                    System.out.println("An anomaly detected: DoS");
+                    System.err.println(i
+                            + " is a DOS cluster (contiguity="
+                            + contiguity + ")");
+                }
+                else {
+                    System.err.println(i + " is not contiguous, "
+                            + "but otherwise looks like a dos cluster (contiguity="
+                            + contiguity + ")");
+                }
             }
         }
 
-        if (minCentVal == maxSize) {
-            List<TimeStep> cluster = km.getClusters().get(maxSize);
-
-            double contiguity = getContiguity(cluster);
-            if (contiguity <= 1.4) {
-                System.out.println("An anomaly detected: portscan");
-                System.err.println(maxSize
-                        + " is a contiguous Portscan cluster (contiguity="
-                        + contiguity + ")");
-            }
-            else {
-                System.err
-                        .println(maxSize
-                                + " is not contiguous, "
-                                + "but otherwise looks like a portscan cluster (contiguity="
-                                + contiguity + ")");
+        // Port scan
+        for (int i = 0; i < numClusters; ++i) {
+            List<TimeStep> cluster = clusters.get(i);
+            
+            if (km.getCentroid(i).octets < 0.7 * avgOctetsNotIn[i]
+                    && km.getCentroid(i).packets > 1.2 * avgPacketsNotIn[i]
+                    && cluster.size() > 0.5 * avgClusterSizeNotIn[i]) {
+                
+                double contiguity = getContiguity(cluster);
+                if (contiguity <= 1.4) {
+                    System.out.println("An anomaly detected: portscan");
+                    System.err.println(i
+                            + " is a Portscan cluster (contiguity="
+                            + contiguity + ")");
+                }
+                else {
+                    System.err
+                            .println(i
+                                    + " is not contiguous, "
+                                    + "but otherwise looks like a portscan cluster (contiguity="
+                                    + contiguity + ")");
+                }
             }
         }
         monitor.printKMeans(km);
