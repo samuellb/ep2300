@@ -1,0 +1,133 @@
+unfinished requests: 1
+unfinished requests: 2
+1: 254 52
+unfinished requests: 3
+2: 293 42
+unfinished requests: 4
+3: 295 30
+unfinished requests: 5
+4: 322 44
+unfinished requests: 6
+5: 261 53
+unfinished requests: 7
+6: 306 41
+unfinished requests: 8
+7: 347 31
+unfinished requests: 9
+8: 330 31
+unfinished requests: 10
+9: 274 56
+unfinished requests: 11
+10: 299 46
+unfinished requests: 12
+11: 320 31
+unfinished requests: 13
+12: 299 45
+unfinished requests: 14
+13: 275 51
+unfinished requests: 16
+14: 288 38
+unfinished requests: 18
+15: 322 37
+unfinished requests: 19
+16: 355 32
+unfinished requests: 20
+17: 333 38
+unfinished requests: 21
+18: 265 79
+unfinished requests: 22
+19: 271 87
+unfinished requests: 23
+20: 330 36
+unfinished requests: 24
+21: 339 30
+unfinished requests: 25
+22: 358 27
+unfinished requests: 26
+23: 298 42
+unfinished requests: 27
+24: 280 41
+unfinished requests: 28
+25: 281 48
+unfinished requests: 29
+26: 299 31
+unfinished requests: 30
+27: 312 38
+unfinished requests: 32
+28: 302 37
+unfinished requests: 33
+29: 256 50
+unfinished requests: 34
+30: 362 35
+unfinished requests: 35
+31: 439 26
+unfinished requests: 35
+32: 2 147757678
+unfinished requests: 36
+33: 2 147757734
+unfinished requests: 37
+34: 2 147757675
+unfinished requests: 39
+35: 2 147757699
+unfinished requests: 40
+36: 2 147757716
+unfinished requests: 41
+37: 2 147757794
+unfinished requests: 42
+38: 2 147757678
+unfinished requests: 43
+39: 2 147757681
+unfinished requests: 44
+40: 2 147757712
+unfinished requests: 45
+41: 2 147757688
+unfinished requests: 46
+42: 2 147757685
+unfinished requests: 47
+43: 2 147757695
+unfinished requests: 48
+44: 2 147757754
+unfinished requests: 49
+45: 2 147757684
+unfinished requests: 50
+46: 2 147757694
+unfinished requests: 51
+47: 2 147757746
+unfinished requests: 52
+48: 2 147757704
+unfinished requests: 53
+49: 2 147757661
+unfinished requests: 54
+50: 2 147757672
+unfinished requests: 56
+51: 2 147757663
+unfinished requests: 57
+52: 2 147757650
+unfinished requests: 58
+53: 2 147757663
+unfinished requests: 59
+54: 2 147757672
+unfinished requests: 60
+55: 2 147757653
+unfinished requests: 61
+56: 2 147757645
+unfinished requests: 62
+57: 2 147757651
+unfinished requests: 63
+58: 2 147757668
+unfinished requests: 64
+59: 2 147757668
+An anomaly detected: portscan
+1 is a contiguous Portscan cluster (contiguity=1.0)
+----------------------------------------------------------------------
+  Clusters -- the syntax for samples is: timestep(packetsize,packets)
+
+cluster:  id=0
+    31(439,26)
+
+cluster:  id=1
+    1(254,52)  2(293,42)  3(295,30)  4(322,44)  5(261,53)  6(306,41)  7(347,31)  8(330,31)  9(274,56)  10(299,46)  11(320,31)  12(299,45)  13(275,51)  14(288,38)  15(322,37)  16(355,32)  17(333,38)  18(265,79)  19(271,87)  20(330,36)  21(339,30)  22(358,27)  23(298,42)  24(280,41)  25(281,48)  26(299,31)  27(312,38)  28(302,37)  29(256,50)  30(362,35)
+
+cluster:  id=2
+    32(2,147757678)  33(2,147757734)  34(2,147757675)  35(2,147757699)  36(2,147757716)  37(2,147757794)  38(2,147757678)  39(2,147757681)  40(2,147757712)  41(2,147757688)  42(2,147757685)  43(2,147757695)  44(2,147757754)  45(2,147757684)  46(2,147757694)  47(2,147757746)  48(2,147757704)  49(2,147757661)  50(2,147757672)  51(2,147757663)  52(2,147757650)  53(2,147757663)  54(2,147757672)  55(2,147757653)  56(2,147757645)  57(2,147757651)  58(2,147757668)  59(2,147757668)
+
