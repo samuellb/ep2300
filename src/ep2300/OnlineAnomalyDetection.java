@@ -307,7 +307,7 @@ public class OnlineAnomalyDetection
         }
         else {
             OAD.run();
-            UDPSnmpV3.close();
+            SNMPConnection.close();
         }
 
     }

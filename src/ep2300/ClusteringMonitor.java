@@ -280,7 +280,7 @@ public class ClusteringMonitor
                 timespan / interval, numClusters);
         monitor.run();
 
-        UDPSnmpV3.close();
+        SNMPConnection.close();
     }
 
 }

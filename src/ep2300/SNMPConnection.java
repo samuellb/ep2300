@@ -17,7 +17,7 @@ import com.adventnet.snmp.snmp2.usm.USMUtils;
 /**
  * Handles the SnmpAPI and the connections to SNMP servers
  */
-public class UDPSnmpV3
+public class SNMPConnection
 {
 
     /**

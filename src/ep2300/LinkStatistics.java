@@ -149,7 +149,7 @@ public final class LinkStatistics implements SnmpClient
             }
         }
 
-        UDPSnmpV3.close();
+        SNMPConnection.close();
         return outstandingRequests.get();
     }
 

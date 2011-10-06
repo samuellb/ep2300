@@ -242,7 +242,7 @@ public class Topology implements SnmpClient
                 // Nothing to do but continue
             }
         }
-        UDPSnmpV3.close();
+        SNMPConnection.close();
     }
 
     /**
@@ -332,7 +332,7 @@ public class Topology implements SnmpClient
 
             topo = new Topology(args[0]);
             topo.waitUntilFinished();
-            UDPSnmpV3.close();
+            SNMPConnection.close();
         }
         else {
             System.err.println("usage: java Topology <first router>");

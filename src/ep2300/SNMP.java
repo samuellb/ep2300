@@ -65,7 +65,7 @@ public class SNMP
         SnmpSession session = null;
         int id = -1;
         try {
-            UDPSnmpV3.Result res = UDPSnmpV3.createSession(ip, client); // Begin
+            SNMPConnection.Result res = SNMPConnection.createSession(ip, client); // Begin
             // here
             session = res.getSession();
             id = res.getClientId();
