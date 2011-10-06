@@ -2,7 +2,7 @@
 
 #i=1
 
-sed -r 's/\s*\[java\] //' | while read line; do
+sed -r 's/\s*\[java\] //' | sed 's/cluster:.*/cluster:/' | while read line; do
 
     if [ "x$line" = "xcluster:" ]; then
         read cluster
