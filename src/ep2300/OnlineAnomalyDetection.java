@@ -178,24 +178,24 @@ public class OnlineAnomalyDetection
         avgOctets /= k;
         avgPackets /= k;
 
-        boolean ddos = false;
+        boolean dos = false;
         for (int i = 0; i < numClusters; ++i) {
             if (km.getCentroid(i).octets < 0.01 * avgOctets
                     && km.getCentroid(i).packets > avgPackets * 100) {
                 System.err.println("Cluster " + i + ":");
-                System.out.println("An anomaly detected: DDoS");
-                ddos = true;
+                System.out.println("An anomaly detected: DoS");
+                dos = true;
             }
         }
 
-        // DDoS
-        if (!ddos && maxCentVal == minSize
+        // DoS
+        if (!dos && maxCentVal == minSize
                 && km.getCentroid(minSize).octets <= 0.2 * avgOctets) {
             List<TimeStep> cluster = km.getClusters().get(minSize);
 
             double contiguity = getContiguity(cluster);
             if (contiguity <= 1.4) {
-                System.out.println("An anomaly detected: DDoS");
+                System.out.println("An anomaly detected: DoS");
                 System.err.println(minSize
                         + " is a contiguous DOS cluster (contiguity="
                         + contiguity + ")");
