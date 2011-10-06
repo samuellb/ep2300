@@ -1,4 +1,30 @@
 
-Course home page:
+1. Build
+--------
 
-http://www.s3.kth.se/lcn/courses/EP2300/
+Type:
+
+    ant compile
+
+
+2. Run the programs
+-------------------
+
+We have some ant targets that make it easy to get started. They use hard
+coded paremters:
+
+    ant run-topology
+    ant run-clusteringmonitor
+    ant run-onlineanomalydetection
+
+
+It's also possible to run the classes directly, for more control:
+
+    cd build
+    
+    java ep2300.Topology <first router>
+    java ep2300.ClusteringMonitor <first router> <interval(ms)> <timespan> <clusters>
+    java ep2300.OnlineAnomalyDetection <first router> <number of global states>
+
+
+
